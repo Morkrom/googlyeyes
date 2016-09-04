@@ -1,0 +1,11 @@
+use_frameworks!
+
+target 'googlyeyes_Example' do
+  pod 'googlyeyes', :path => '../'
+
+  target 'googlyeyes_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end

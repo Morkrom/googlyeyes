@@ -1,3 +1,4 @@
+    //backgroundColor = UIColor.clearColor()
 //
 //  AppDelegate.swift
 //  googlyeyes

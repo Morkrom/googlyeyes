@@ -18,7 +18,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
       let eysView = GooglyEyeView(frame: CGRect(x: 30, y: 100, width: 300, height: 100))
       view.addSubview(eysView)
-      view.backgroundColor = UIColor.blackColor()
+      view.backgroundColor = UIColor.black
     }
 
     override func didReceiveMemoryWarning() {
@@ -37,23 +37,25 @@ class ViewController: UIViewController {
 //determine and add some tests
 
 class GooglyEye: UIView {
+  static var defaultPupilDiameterPercentageWidth: CGFloat = 0.66
   var pupilView = Pupil()
-  var pupilDiameterPercentageWidth: CGFloat = 0.66 {
+  var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth {
     didSet {
+      //print("diametprecrewidth: \(pupilDiameterPercentageWidth)")
       if pupilDiameterPercentageWidth > 1.0 {
         pupilDiameterPercentageWidth = 1.0
       } else if pupilDiameterPercentageWidth < 0 {
         pupilDiameterPercentageWidth = 0.01
       }
-
+      //print("diametprecepwdith: \(pupilDiameterPercentageWidth)")
       pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
     }
   }
   
   override init(frame: CGRect) {
     super.init(frame: frame)
-    backgroundColor = UIColor.whiteColor()
-    pupilView.backgroundColor = UIColor.blackColor()
+    backgroundColor = UIColor.white
+    pupilView.backgroundColor = UIColor.black
     addSubview(pupilView)
   }
 
@@ -74,7 +76,7 @@ class Pupil: UIView {
   @available(iOS 9.0, *) // w/o iOS 9 you're screwed, you shouldn't be under this anyway.
   override var collisionBoundsType: UIDynamicItemCollisionBoundsType {
     get {
-      return .Ellipse
+      return .ellipse
     }
   }
   
@@ -85,50 +87,98 @@ class Pupil: UIView {
   }
 }
 
+
+
 class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
   static let Left = 1
   static let Right = 2
   var eyeDiameter: CGFloat = 20
+  var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth
   
   let leftEye = GooglyEye()
   let rightEye = GooglyEye()
   
-  var animators = [UIDynamicAnimator]()
-  var gravityBehaviors = [String:UIGravityBehavior]()
+  private var animations = [String:Animation]()
   var displayLink: CADisplayLink!
   
-  var collisionBehaviorForBoundaryIdentifierShouldSlowItsRoll = [String:Bool]()
-  var frictionTiming = [String:CFTimeInterval]()
-  var collisionEndedCountNoiseBuffer = [String:Int]()
+  var beforeThereWasStaticReferenceAcceleration = CGVector()
+  
+  class Animation {
+    let animator: UIDynamicAnimator
+    var behaviors: [String:UIDynamicBehavior]
+    let eye: GooglyEye
+    private var behaviorsLocked = false
+    
+    func resetBehaviors() {
+      print(" \n ---- \n animator.behaviors count: \(animator.behaviors.count), behaviors count:\(behaviors.count) \n ---- \n ")
+      if animator.behaviors.count < behaviors.count {
+        animator.removeAllBehaviors()
+        for behavior in behaviors {
+          animator.addBehavior(behavior.1)
+        }
+      }
+    }
+    
+    init(eye: GooglyEye) {
+      
+      self.eye = eye
+      animator = UIDynamicAnimator(referenceView: eye)
+      
+      let boundaryBehavior = UICollisionBehavior(items: [eye.pupilView])
+      let gravityBehavior = UIGravityBehavior(items: [eye.pupilView])
+      
+      boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: eye.bounds))
+      boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
+      animator.addBehavior(gravityBehavior)
+      animator.addBehavior(boundaryBehavior)
+      print(animator.behaviors.count)
+      behaviors = ["gravity" : gravityBehavior,
+                    "boundary" : boundaryBehavior]
+    }
+    
+    func update(gravity: CMAcceleration, acceleration: CMAcceleration) {
+
+      let accM = 13.0
+      let gvM = 2.5
+      
+      if let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior {
+      
+        let direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
+        gravityBehavior.gravityDirection = direction
+        behaviors["gravity"] = gravityBehavior
+        if (abs(gravity.z) < 0.95) {
+          //enable gravity behaviors
+          
+          if behaviorsLocked {
+            self.resetBehaviors()
+//            print("restart")
+          }
+          
+          behaviorsLocked = false
+          
+        } else {
+//          print("disable: \(abs(gravity.z))")
+//          //disable gravity behaviors
+//          print("animator count: \(animator.behaviors.count)")
+          animator.removeAllBehaviors()
+          behaviorsLocked = true
+        }
+        
+        
+      } else {
+        print("no gravity behavior")
+      }
+    }
+  }
   
   func link(link: CADisplayLink) {
     guard let gravity = coreMotionManager.deviceMotion?.gravity else {return}
     guard let acceleration = coreMotionManager.deviceMotion?.userAcceleration else {return}
-    
-    var count = 0
-    for behavior in gravityBehaviors {
-      //engage static when too close to any edge
-      //disengage static when acceleration is .. up there
-      //let gravity have its way w/o static
+    //print("z: \(gravity.z)")
+  
+    for animation in animations {
+      animation.1.update(gravity: gravity, acceleration: acceleration)
       
-      
-      
-      /*
-       staticEngaged = abs(acceleration.x*acceleration.y) > staticEngagementThreshold
-       
-       if (staticEngaged) {
-        //previousDirection may be randomized on an arc for static being engaged
-        //accelerationDirection = previousDirection
-       } else {
-        
-       }
-       
-       
-       */
-      let engageStatic = collisionBehaviorForBoundaryIdentifierShouldSlowItsRoll[behavior.0]
-      let accelerationDirection = CGVector(dx: engageStatic == true ? -(acceleration.x*10 + gravity.x) : (acceleration.x*10 + gravity.x), dy: engageStatic == true ? (acceleration.y*10 + gravity.y) : -(acceleration.y*10 + gravity.y))
-      behavior.1.gravityDirection = accelerationDirection
-      count += 1
     }
   }
   
@@ -138,22 +188,23 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
   
   override init(frame: CGRect) {
     super.init(frame: frame)
-    backgroundColor = UIColor.greenColor().colorWithAlphaComponent(0.3)
+    backgroundColor = UIColor.green.withAlphaComponent(0.5)
     eyeDiameter = eyesDiameter()
-      
     coreMotionManager.startDeviceMotionUpdates()
     
-    displayLink = CADisplayLink(target: self, selector: #selector(GooglyEyeView.link(_:)))
-    displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+    displayLink = CADisplayLink(target: self, selector: #selector(GooglyEyeView.link))
+    displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
     displayLink.frameInterval = 2
     
     addSubview(leftEye)
     addSubview(rightEye)
     
+    pupilDiameterPercentageWidth = 0.3
     frameUp()
     
-    addGooglyBehavior(leftEye, key: "left")
-    addGooglyBehavior(rightEye, key: "right")
+    animations["left"] = Animation(eye: leftEye)
+    animations["right"] = Animation(eye: rightEye)
+
    }
   
   override func layoutSubviews() {
@@ -166,53 +217,14 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
     let y = (frame.height - eyeDiameter)/2
     leftEye.frame = CGRect(origin: CGPoint(x:0, y:y), size: size)
     rightEye.frame = CGRect(origin: CGPoint(x:frame.width - eyeDiameter, y:y), size: size)
-  }
-  
-  func addGooglyBehavior(eye: GooglyEye, key: String) {
-    let animator = UIDynamicAnimator(referenceView: eye)
-    let gravityBehavior = UIGravityBehavior(items: [eye.pupilView])
-    let boundaryBehavior = UICollisionBehavior(items: [eye.pupilView])
     
-    
-    boundaryBehavior.collisionDelegate = self
-    boundaryBehavior.addBoundaryWithIdentifier(key, forPath: UIBezierPath(ovalInRect: eye.bounds))
-    boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
-    animator.addBehavior(gravityBehavior)
-    animator.addBehavior(boundaryBehavior)
-    
-    animators.append(animator)
-    gravityBehaviors[key] = gravityBehavior
+    for eye in [leftEye, rightEye] {
+      eye.pupilDiameterPercentageWidth = self.pupilDiameterPercentageWidth
+    }
   }
   
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
-  func engageStatic(eyeball: String) {
-    let begin = randomNanoSecondsTime(0)
-    
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, begin), dispatch_get_main_queue()) { [weak self] in
-      self?.collisionBehaviorForBoundaryIdentifierShouldSlowItsRoll[eyeball] = true
-    }
-
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, begin + randomNanoSecondsTime(5.0)), dispatch_get_main_queue()) { [weak self] in
-      self?.collisionBehaviorForBoundaryIdentifierShouldSlowItsRoll[eyeball] = false
-    }
-  }
-  
-  func randomNanoSecondsTime(ceiling: Float32) -> Int64 {
-    return Int64(Float(NSEC_PER_SEC) * Float32(arc4random_uniform(100)) * ceiling)
-  }
-  
-  func collisionBehavior(behavior: UICollisionBehavior, beganContactForItem item: UIDynamicItem, withBoundaryIdentifier identifier: NSCopying?, atPoint p: CGPoint) {
-    guard let eyeballIdentifier = identifier as? String else {return}
-    if item.center.y < eyeDiameter/2 {
-      engageStatic(eyeballIdentifier)
-    }
-    else {
-      collisionBehaviorForBoundaryIdentifierShouldSlowItsRoll[eyeballIdentifier] = false
-    }
-  }
-  
 }
 

@@ -87,8 +87,6 @@ class Pupil: UIView {
   }
 }
 
-
-
 class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
   static let Left = 1
   static let Right = 2
@@ -103,14 +101,14 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
   
   var beforeThereWasStaticReferenceAcceleration = CGVector()
   
-  class Animation {
+  private class Animation {
+    
     let animator: UIDynamicAnimator
     var behaviors: [String:UIDynamicBehavior]
     let eye: GooglyEye
     private var behaviorsLocked = false
     
     func resetBehaviors() {
-      print(" \n ---- \n animator.behaviors count: \(animator.behaviors.count), behaviors count:\(behaviors.count) \n ---- \n ")
       if animator.behaviors.count < behaviors.count {
         animator.removeAllBehaviors()
         for behavior in behaviors {
@@ -140,30 +138,23 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
 
       let accM = 13.0
       let gvM = 2.5
+      let maxGravity = 0.95
+      let maxAcceleration = 0.03
       
       if let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior {
       
         let direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
         gravityBehavior.gravityDirection = direction
         behaviors["gravity"] = gravityBehavior
-        if (abs(gravity.z) < 0.95) {
-          //enable gravity behaviors
-          
+        if (abs(gravity.z) < maxGravity || (abs(acceleration.x) > maxAcceleration || abs(acceleration.y) > maxAcceleration)) {
           if behaviorsLocked {
             self.resetBehaviors()
-//            print("restart")
           }
-          
           behaviorsLocked = false
-          
         } else {
-//          print("disable: \(abs(gravity.z))")
-//          //disable gravity behaviors
-//          print("animator count: \(animator.behaviors.count)")
           animator.removeAllBehaviors()
           behaviorsLocked = true
         }
-        
         
       } else {
         print("no gravity behavior")

@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreMotion
+import QuartzCore
 
 let coreMotionManager = CMMotionManager()
 
@@ -27,28 +28,48 @@ class ViewController: UIViewController {
     }
 }
 
+// static electricity area rub - (save points in a decaying rubbing buffer from a pan gesture)
 // 6 add sheen gradient view corresponding to gravity direction
-// 1 add sizing + nose gap for eyes view based on difference between width and height... you'll figure it out, you clever boy.
 // 3 support for autolayout
-// 5 isLazy <- random difference
-// 4 add friction if boundaries are met
-// 2 add shaking
-
-//determine and add some tests
 
 class GooglyEye: UIView {
   static var defaultPupilDiameterPercentageWidth: CGFloat = 0.66
   var pupilView = Pupil()
   var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth {
     didSet {
-      //print("diametprecrewidth: \(pupilDiameterPercentageWidth)")
       if pupilDiameterPercentageWidth > 1.0 {
         pupilDiameterPercentageWidth = 1.0
       } else if pupilDiameterPercentageWidth < 0 {
         pupilDiameterPercentageWidth = 0.01
       }
-      //print("diametprecepwdith: \(pupilDiameterPercentageWidth)")
       pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
+    }
+  }
+  
+  private class PlasticSheenView : UIView {
+//    let gradientLayer = CAGradientLayer()
+    
+    override init(frame: CGRect) {
+      super.init(frame: frame)
+//      gradientLayer.frame = bounds
+    }
+    
+    private override func draw(_ rect: CGRect) {
+      super.draw(rect)
+      
+      let colorSpace = CGColorSpaceCreateDeviceRGB()
+      let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+      guard let context = CGContext(data: nil, width: Int(rect.width), height: Int(rect.height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue) else {return}
+
+//      let arr: CFArray = [1, 0.5, 0.4, 0.5, 0.8, 0.8, 0.3, 1.0]
+//      let gradient = CGGradient(colorsSpace: colorSpace, colors: arr, locations: arr)
+//      
+//      context.drawLinearGradient(<#T##gradient: CGGradient##CGGradient#>, start: <#T##CGPoint#>, end: <#T##CGPoint#>, options: <#T##CGGradientDrawingOptions#>)
+      
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
     }
   }
   
@@ -190,7 +211,6 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
     addSubview(leftEye)
     addSubview(rightEye)
     
-    pupilDiameterPercentageWidth = 0.3
     frameUp()
     
     animations["left"] = Animation(eye: leftEye)
@@ -218,4 +238,3 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
     fatalError("init(coder:) has not been implemented")
   }
 }
-

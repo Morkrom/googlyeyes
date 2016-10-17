@@ -20,6 +20,8 @@ class ViewController: UIViewController {
       let eysView = GooglyEyeView(frame: CGRect(x: 30, y: 100, width: 300, height: 100))
       view.addSubview(eysView)
       view.backgroundColor = UIColor.black
+      let eye = GooglyEye(frame: CGRect(x: 30, y: 300, width: 100, height: 100))
+      view.addSubview(eye)
     }
 
     override func didReceiveMemoryWarning() {
@@ -28,64 +30,204 @@ class ViewController: UIViewController {
     }
 }
 
+//plastic ring "stamping" 
+//  gray plastic "sheen", dark gray thin gradiated edge 
+//  - 5-10% of width is stamp, random distance to edge of eye ball - include new actual center offset and boundary dimension for pupil
 // static electricity area rub - (save points in a decaying rubbing buffer from a pan gesture)
 // 6 add sheen gradient view corresponding to gravity direction
 // 3 support for autolayout
 
-class GooglyEye: UIView {
-  static var defaultPupilDiameterPercentageWidth: CGFloat = 0.66
-  var pupilView = Pupil()
-  var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth {
-    didSet {
-      if pupilDiameterPercentageWidth > 1.0 {
-        pupilDiameterPercentageWidth = 1.0
-      } else if pupilDiameterPercentageWidth < 0 {
-        pupilDiameterPercentageWidth = 0.01
-      }
-      pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
-    }
+/*
+ - STATIC -
+   pan gesture recognizer:
+   - the CGPoint
+   - have a points list with [point, media time]
+*/
+
+extension UIView {
+  
+  // motion effects, yo...
+  internal func addEffect(horizontalTotalRelativeRange: CGFloat, verticalTotalRelativeRange: CGFloat) {
+
+    let horizontalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
+    horizontalMotionEffect.minimumRelativeValue = -horizontalTotalRelativeRange/2
+    horizontalMotionEffect.maximumRelativeValue = horizontalTotalRelativeRange/2
+    addMotionEffect(horizontalMotionEffect)
+    
+    let verticalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
+    verticalMotionEffect.minimumRelativeValue = -verticalTotalRelativeRange/2
+    verticalMotionEffect.maximumRelativeValue = verticalTotalRelativeRange/2
+    addMotionEffect(verticalMotionEffect)
+  }
+}
+
+class RingLayer: CALayer {
+  
+  override init() {
+    super.init()
+    backgroundColor = UIColor.clear.cgColor
   }
   
-  private class PlasticSheenView : UIView {
-//    let gradientLayer = CAGradientLayer()
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  override func draw(in ctx: CGContext) {
     
-    override init(frame: CGRect) {
-      super.init(frame: frame)
-//      gradientLayer.frame = bounds
-    }
-    
-    private override func draw(_ rect: CGRect) {
-      super.draw(rect)
-      
-      let colorSpace = CGColorSpaceCreateDeviceRGB()
-      let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
-      guard let context = CGContext(data: nil, width: Int(rect.width), height: Int(rect.height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue) else {return}
+    ctx.setBlendMode(.clear)
 
-//      let arr: CFArray = [1, 0.5, 0.4, 0.5, 0.8, 0.8, 0.3, 1.0]
-//      let gradient = CGGradient(colorsSpace: colorSpace, colors: arr, locations: arr)
-//      
-//      context.drawLinearGradient(<#T##gradient: CGGradient##CGGradient#>, start: <#T##CGPoint#>, end: <#T##CGPoint#>, options: <#T##CGGradientDrawingOptions#>)
-      
-    }
+    ctx.setShouldAntialias(true)
+    ctx.setAllowsAntialiasing(true)
+    ctx.clear(bounds)
+    ctx.addRect(bounds)
+    ctx.setFillColor(red: 1, green: 1, blue: 0.5, alpha: 1)
+
+    ctx.clip()
     
-    required init?(coder aDecoder: NSCoder) {
-      fatalError("init(coder:) has not been implemented")
-    }
+    let center = CGPoint(x: bounds.width/2, y: bounds.height/2)
+    let outerRadius = bounds.width/2 * 0.85 // dyou see what's going on here?? do you?
+    let envelopingEllipseRadius = outerRadius + outerRadius*0.01
+    ctx.addEllipse(in: CGRect(x: center.x - envelopingEllipseRadius, y:center.y - envelopingEllipseRadius , width: envelopingEllipseRadius*2, height: envelopingEllipseRadius*2))
+
+//    ctx.setFillColor(red: 1, green: 1, blue: 0.5, alpha: 1)
+//    ctx.fill(bounds)
+
+    ctx.clip()
+    
+    let baseStampGradient = CGGradient(colorsSpace: nil,
+                                       colors: [UIColor.clear.cgColor, UIColor.lightGray.cgColor] as CFArray,
+                                       locations: nil)
+    
+    ctx.drawRadialGradient(baseStampGradient!,
+                           startCenter: CGPoint(x: bounds.width/2, y: bounds.height/2),
+                           startRadius: outerRadius * 0.9,
+                           endCenter: CGPoint(x: bounds.width/2, y: bounds.height/2),
+                           endRadius: outerRadius,
+                           options: .drawsAfterEndLocation)
+
+    
+//    ctx.setFillColor(red: 1, green: 1, blue: 0.5, alpha: 1)
+//    ctx.fill(bounds)
+  }
+}
+
+class FloatingRingLayer: CALayer {
+  
+  override init() {
+    super.init()
+  }
+  
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  override func draw(in ctx: CGContext) {
+
+    //ctx.setBlendMode(.clear)
+ 
+    ctx.setShouldAntialias(true)
+    ctx.setAllowsAntialiasing(true)
+    ctx.clear(bounds)
+    ctx.addRect(bounds)
+    ctx.clip()
+    
+    let center = CGPoint(x: bounds.width/2, y: bounds.height/2)
+    let outerRadius = bounds.width/2 * 0.85 // dyou see what's going on here?? do you?
+    let envelopingEllipseRadius = outerRadius + outerRadius*0.01
+    
+    ctx.addEllipse(in: CGRect(x: center.x - envelopingEllipseRadius, y:center.y - envelopingEllipseRadius , width: envelopingEllipseRadius*2, height: envelopingEllipseRadius*2))
+
+    //    ctx.setFillColor(red: 1, green: 1, blue: 0.5, alpha: 1)
+    //    ctx.fill(bounds)
+    
+    ctx.clip()
+    ctx.fill(bounds)
+    ctx.clear(bounds)
+    let baseStampGradient = CGGradient(colorsSpace: nil,
+                                       colors: [UIColor.clear.cgColor, UIColor.lightGray.cgColor] as CFArray,
+                                       locations: nil)
+    
+    ctx.drawRadialGradient(baseStampGradient!,
+                           startCenter: CGPoint(x: bounds.width/2, y: bounds.height/2),
+                           startRadius: outerRadius * 0.9,
+                           endCenter: CGPoint(x: bounds.width/2, y: bounds.height/2),
+                           endRadius: outerRadius,
+                           options: .drawsBeforeStartLocation) // <- This could be extended as a 'cone' depending on device dynamics
+  //drawsAfterEndLocation
+    
+  }
+}
+
+class FloatingRingView: UIView {
+  
+  override open class var layerClass: Swift.AnyClass {
+    return FloatingRingLayer.self
   }
   
   override init(frame: CGRect) {
     super.init(frame: frame)
-    backgroundColor = UIColor.white
+    backgroundColor = UIColor.clear
+  }
+  
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  override var frame: CGRect {
+    didSet {
+      layer.setNeedsDisplay()
+    }
+  }
+}
+
+class GooglyEye: UIView {
+  static var defaultPupilDiameterPercentageWidth: CGFloat = 0.3//0.66
+  var pupilView = Pupil()
+  let floatingRingView = FloatingRingView(frame: .zero)
+  var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth {
+    didSet {
+      adjustPupilForNewWidth()
+    }
+  }
+  
+//  override open class var layerClass: Swift.AnyClass {
+//    return RingLayer.self
+//  }
+  
+  override init(frame: CGRect) {
+    super.init(frame: frame)
+    backgroundColor = GooglyEyeAntiPattern.plasticGrayColor()
     pupilView.backgroundColor = UIColor.black
     addSubview(pupilView)
+    
+    floatingRingView.backgroundColor = UIColor.clear
+    addSubview(floatingRingView)
+    floatingRingView.addEffect(horizontalTotalRelativeRange: frame.width*0.1, verticalTotalRelativeRange: frame.height*0.1)
+    layer.setNeedsDisplay()
+    floatingRingView.frame = bounds
   }
 
   override var frame: CGRect {
     didSet {
       layer.cornerRadius = frame.width/2
       pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
+      floatingRingView.frame = bounds
     }
   }
+  
+  
+  func adjustPupilForNewWidth() {
+    if pupilDiameterPercentageWidth > 1.0 {
+      pupilDiameterPercentageWidth = 1.0
+    } else if pupilDiameterPercentageWidth < 0 {
+      pupilDiameterPercentageWidth = 0.01
+    }
+    pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2,
+                             y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2,
+                             width: frame.width*pupilDiameterPercentageWidth,
+                             height: frame.height*pupilDiameterPercentageWidth)
+  }
+  
   
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
@@ -236,5 +378,11 @@ class GooglyEyeView: UIView, UICollisionBehaviorDelegate {
   
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+}
+
+
+class GooglyEyeAntiPattern {
+  static func plasticGrayColor() -> UIColor { return UIColor(colorLiteralRed: 0.99, green: 0.99, blue: 0.99, alpha: 1)//That shitty 'gray' color for clear plastic
   }
 }

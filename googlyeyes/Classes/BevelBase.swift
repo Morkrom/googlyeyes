@@ -53,7 +53,7 @@ class BevelBase: CALayer {
                                        colors: [UIColor.clear.cgColor, grayColor] as CFArray,
                                        locations: nil)
     
-    let radius = GooglyEyeAntiPattern.cutoutRadius(dimension: bounds.width)
+    let radius = GooglyEye.cutoutRadius(dimension: bounds.width)
     ctx.drawRadialGradient(baseStampGradient!,
                            startCenter: startCenter,
                            startRadius: radius,

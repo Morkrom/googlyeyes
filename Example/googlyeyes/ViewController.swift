@@ -13,8 +13,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-      let eysView = GooglyEyeView(frame: CGRect(x: 30, y: 100, width: 300, height: 100))
-      view.addSubview(eysView)
       view.backgroundColor = UIColor.black
       let eye = GooglyEye(frame: CGRect(x: 30, y: 300, width: 100, height: 100))
       view.addSubview(eye)
@@ -39,20 +37,3 @@ class ViewController: UIViewController {
    - the CGPoint
    - have a points list with [point, media time]
 */
-
-extension UIView {
-  
-  // motion effects, yo...
-  internal func addEffect(horizontalTotalRelativeRange: CGFloat, verticalTotalRelativeRange: CGFloat) {
-
-    let horizontalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
-    horizontalMotionEffect.minimumRelativeValue = -horizontalTotalRelativeRange/2
-    horizontalMotionEffect.maximumRelativeValue = horizontalTotalRelativeRange/2
-    addMotionEffect(horizontalMotionEffect)
-    
-    let verticalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
-    verticalMotionEffect.minimumRelativeValue = -verticalTotalRelativeRange/2
-    verticalMotionEffect.maximumRelativeValue = verticalTotalRelativeRange/2
-    addMotionEffect(verticalMotionEffect)
-  }
-}

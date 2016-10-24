@@ -28,11 +28,15 @@ class BevelTop: CALayer {
     let outerRadius = GooglyEye.cutoutRadius(dimension: bounds.width)
     let center = CGPoint(x: bounds.width/2, y: bounds.height/2)
     
-    ctx.setStrokeColor(UIColor.darkGray.cgColor)
-    ctx.setLineWidth(1.0)
     let frameOrigin = CGPoint(x: center.x - outerRadius, y: center.y - outerRadius)
     let frame = CGRect(origin: frameOrigin, size: CGSize(width: outerRadius*2, height: outerRadius*2))
-    ctx.addPath(CGPath(ellipseIn: frame, transform: nil))
+    
+    ctx.setFillColor(UIColor.yellow.withAlphaComponent(0.5).cgColor)
+    ctx.fillEllipse(in: frame)
+    
+    ctx.setStrokeColor(UIColor.darkGray.cgColor)
+    ctx.setLineWidth(1.0)
+    ctx.addEllipse(in: frame)
     ctx.drawPath(using: .stroke)
   }
 }

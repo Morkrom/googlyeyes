@@ -18,11 +18,11 @@ class GooglyEye: UIView {
   }
   
   static func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
-  
-  static var defaultPupilDiameterPercentageWidth: CGFloat = 0.3
+  var cutoutRadius: CGFloat = 0.0
+
   fileprivate var pupilView = Pupil()
   let floatingRingView = FloatingRingView(frame: .zero)
-  var pupilDiameterPercentageWidth: CGFloat = GooglyEye.defaultPupilDiameterPercentageWidth {
+  var pupilDiameterPercentageWidth: CGFloat = 0.3 {
     didSet {
       adjustPupilForNewWidth()
     }
@@ -48,8 +48,8 @@ class GooglyEye: UIView {
     
     let center = ringLayerCenterPointForManufacturingDefects()
     let dimension = layer.bounds.width
-    
     floatingRingView.frame = CGRect(origin: CGPoint(x: center.x - dimension/2, y: center.y - dimension/2), size: CGSize(width: dimension, height: dimension))
+
     addSubview(floatingRingView)
     floatingRingView.addEffect(horizontalTotalRelativeRange: frame.width*0.25, verticalTotalRelativeRange: frame.height*0.25)
     layer.setNeedsDisplay()
@@ -67,6 +67,7 @@ class GooglyEye: UIView {
   
   override var frame: CGRect {
     didSet {
+      cutoutRadius = frame.height/2 * 0.85
       layer.cornerRadius = frame.width/2
       pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
       floatingRingView.frame = bounds
@@ -117,19 +118,14 @@ private class Pupil: UIView {
 
 private class Animation {
   
-  let animator: UIDynamicAnimator
-  var behaviors: [String:UIDynamicBehavior]
-  let eye: GooglyEye
+  private let animator: UIDynamicAnimator
+  private var behaviors: [String:UIDynamicBehavior]
+  private let eye: GooglyEye
   private var behaviorsLocked = false
-  
-  func resetBehaviors() {
-    if animator.behaviors.count < behaviors.count {
-      animator.removeAllBehaviors()
-      for behavior in behaviors {
-        animator.addBehavior(behavior.1)
-      }
-    }
-  }
+  private let accM = 13.0
+  private let gvM = 2.5
+  private let maxGravity = 0.95
+  private let maxAcceleration = 0.03
   
   init(eye: GooglyEye) {
     
@@ -139,21 +135,19 @@ private class Animation {
     let boundaryBehavior = UICollisionBehavior(items: [eye.pupilView])
     let gravityBehavior = UIGravityBehavior(items: [eye.pupilView])
     
-    boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: eye.bounds))
+    let point = eye.ringLayerCenterPointForManufacturingDefects()
+    let ovalFrame = CGRect(origin: CGPoint(x: point.x - eye.cutoutRadius, y: point.y - eye.cutoutRadius),
+                           size: CGSize(width: eye.cutoutRadius*2, height: eye.cutoutRadius*2))
+    
+    boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
     boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
     animator.addBehavior(gravityBehavior)
     animator.addBehavior(boundaryBehavior)
-    print(animator.behaviors.count)
     behaviors = ["gravity" : gravityBehavior,
                  "boundary" : boundaryBehavior]
   }
   
   func update(gravity: CMAcceleration, acceleration: CMAcceleration) {
-    
-    let accM = 13.0
-    let gvM = 2.5
-    let maxGravity = 0.95
-    let maxAcceleration = 0.03
     
     if let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior {
       
@@ -172,6 +166,15 @@ private class Animation {
       
     } else {
       print("no gravity behavior")
+    }
+  }
+  
+  private func resetBehaviors() {
+    if animator.behaviors.count < behaviors.count {
+      animator.removeAllBehaviors()
+      for behavior in behaviors {
+        animator.addBehavior(behavior.1)
+      }
     }
   }
 }

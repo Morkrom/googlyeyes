@@ -12,6 +12,10 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
+		9D94755D1DBDEEBA0035193B /* FloatingRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */; };
+		9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475601DBDEEE80035193B /* GooglyEye.swift */; };
+		9D9475631DBDEFA90035193B /* BevelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475621DBDEFA90035193B /* BevelBase.swift */; };
+		9D9475651DBDEFB80035193B /* BevelTop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475641DBDEFB80035193B /* BevelTop.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +30,10 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		75533F5307CF2104A22A2F80 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FloatingRingView.swift; path = ../googlyeyes/Classes/FloatingRingView.swift; sourceTree = "<group>"; };
+		9D9475601DBDEEE80035193B /* GooglyEye.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GooglyEye.swift; path = ../googlyeyes/Classes/GooglyEye.swift; sourceTree = "<group>"; };
+		9D9475621DBDEFA90035193B /* BevelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BevelBase.swift; path = ../googlyeyes/Classes/BevelBase.swift; sourceTree = "<group>"; };
+		9D9475641DBDEFB80035193B /* BevelTop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BevelTop.swift; path = ../googlyeyes/Classes/BevelTop.swift; sourceTree = "<group>"; };
 		A1F0ECE2E0FACD8430C19BC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -43,6 +51,7 @@
 		607FACC71AFB9204008FA782 = {
 			isa = PBXGroup;
 			children = (
+				9D94755B1DBDEE8C0035193B /* Views */,
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
 				607FACD21AFB9204008FA782 /* Example for googlyeyes */,
 				607FACE81AFB9204008FA782 /* Tests */,
@@ -105,6 +114,17 @@
 				75533F5307CF2104A22A2F80 /* LICENSE */,
 			);
 			name = "Podspec Metadata";
+			sourceTree = "<group>";
+		};
+		9D94755B1DBDEE8C0035193B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				9D9475601DBDEEE80035193B /* GooglyEye.swift */,
+				9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */,
+				9D9475621DBDEFA90035193B /* BevelBase.swift */,
+				9D9475641DBDEFB80035193B /* BevelTop.swift */,
+			);
+			name = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -182,6 +202,10 @@
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
+				9D94755D1DBDEEBA0035193B /* FloatingRingView.swift in Sources */,
+				9D9475631DBDEFA90035193B /* BevelBase.swift in Sources */,
+				9D9475651DBDEFB80035193B /* BevelTop.swift in Sources */,
+				9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,14 +328,16 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = ENNRQNV9Z8;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				INFOPLIST_FILE = googlyeyes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE = "63c6b829-4eb5-420a-8e02-3e1f2c940c15";
 				PROVISIONING_PROFILE_SPECIFIER = wild;
 				SWIFT_VERSION = 3.0;
 			};
@@ -323,15 +349,16 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = ENNRQNV9Z8;
+				DEVELOPMENT_TEAM = DNECK873KY;
 				EMBED_ASSET_PACKS_IN_PRODUCT_BUNDLE = YES;
 				INFOPLIST_FILE = googlyeyes/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.demo.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				PROVISIONING_PROFILE_SPECIFIER = wild;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;

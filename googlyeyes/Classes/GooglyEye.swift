@@ -54,8 +54,6 @@ class GooglyEye: UIView {
     floatingRingView.addEffect(horizontalTotalRelativeRange: frame.width*0.25, verticalTotalRelativeRange: frame.height*0.25)
     layer.setNeedsDisplay()
     
-    
-    
     coreMotionManager.startDeviceMotionUpdates()
     
     displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))

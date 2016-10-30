@@ -32,8 +32,6 @@ class BevelBase: CALayer {
   override init() {
     super.init()
     backgroundColor = UIColor.clear.cgColor
-    
-    
   }
   
   required init?(coder aDecoder: NSCoder) {

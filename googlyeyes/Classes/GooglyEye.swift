@@ -21,7 +21,6 @@ class GooglyEye: UIView {
   var cutoutRadius: CGFloat = 0.0
 
   fileprivate var pupilView = Pupil()
-  let floatingRingView = FloatingRingView(frame: .zero)
   var pupilDiameterPercentageWidth: CGFloat = 0.3 {
     didSet {
       adjustPupilForNewWidth()
@@ -44,16 +43,7 @@ class GooglyEye: UIView {
     pupilView.backgroundColor = UIColor.black
     addSubview(pupilView)
     
-    floatingRingView.backgroundColor = UIColor.clear
-    
-    let center = ringLayerCenterPointForManufacturingDefects()
-    let dimension = layer.bounds.width
-    floatingRingView.frame = CGRect(origin: CGPoint(x: center.x - dimension/2, y: center.y - dimension/2), size: CGSize(width: dimension, height: dimension))
-
-    addSubview(floatingRingView)
-    floatingRingView.addEffect(horizontalTotalRelativeRange: frame.width*0.25, verticalTotalRelativeRange: frame.height*0.25)
     layer.setNeedsDisplay()
-    
     coreMotionManager.startDeviceMotionUpdates()
     
     displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
@@ -68,7 +58,7 @@ class GooglyEye: UIView {
       cutoutRadius = frame.height/2 * 0.85
       layer.cornerRadius = frame.width/2
       pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
-      floatingRingView.frame = bounds
+//      floatingRingView.frame = bounds
     }
   }
   
@@ -93,9 +83,12 @@ class GooglyEye: UIView {
   private var displayLink: CADisplayLink!
   
   func link(link: CADisplayLink) {
-    guard let gravity = coreMotionManager.deviceMotion?.gravity else {return}
-    guard let acceleration = coreMotionManager.deviceMotion?.userAcceleration else {return}
-    animation?.update(gravity: gravity, acceleration: acceleration)
+    guard let motion = coreMotionManager.deviceMotion,
+          let ringLayer = layer as? BevelBase else {return}
+    let pitchPercent = CGFloat(motion.attitude.pitch)/CGFloat(1.5)
+    let rollPercent = CGFloat(motion.attitude.roll)/CGFloat(1.5)
+    animation?.update(gravity: motion.gravity, acceleration: motion.userAcceleration)
+    ringLayer.update(pitchPercent:pitchPercent, rollPercent: rollPercent)
   }
 }
 

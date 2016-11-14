@@ -50,7 +50,7 @@ class GooglyEye: UIView {
     displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
     displayLink.frameInterval = 2
     
-    animation = Animation(eye: self)
+    animation = GooglyPupilAnimation(googlyEye: self, center: ringLayerCenterPointForManufacturingDefects(), travelRadius: GooglyEye.cutoutRadius(dimension: bounds.width))
   }
   
   override var frame: CGRect {
@@ -79,7 +79,7 @@ class GooglyEye: UIView {
     fatalError("init(coder:) has not been implemented")
   }
   
-  private var animation: Animation?
+  private var animation: GooglyPupilAnimation?
   private var displayLink: CADisplayLink!
   
   func link(link: CADisplayLink) {
@@ -107,65 +107,58 @@ private class Pupil: UIView {
   }
 }
 
-private class Animation {
-  
-  private let animator: UIDynamicAnimator
-  private var behaviors: [String:UIDynamicBehavior]
-  private let eye: GooglyEye
-  private var behaviorsLocked = false
-  private let accM = 13.0
-  private let gvM = 2.5
-  private let maxGravity = 0.95
-  private let maxAcceleration = 0.03
-  
-  init(eye: GooglyEye) {
+private class GooglyPupilAnimation {
     
-    self.eye = eye
-    animator = UIDynamicAnimator(referenceView: eye)
+        private let animator: UIDynamicAnimator
+        private var behaviors: [String:UIDynamicBehavior]
+        private var behaviorsLocked = false
+        private let accM = 13.0
+        private let gvM = 2.5
+        private let maxGravity = 0.95
+        private let maxAcceleration = 0.03
     
-    let boundaryBehavior = UICollisionBehavior(items: [eye.pupilView])
-    let gravityBehavior = UIGravityBehavior(items: [eye.pupilView])
+        init(googlyEye: GooglyEye, center: CGPoint, travelRadius: CGFloat) {
+        
+                animator = UIDynamicAnimator(referenceView: googlyEye)
+                let boundaryBehavior = UICollisionBehavior(items: [googlyEye.pupilView])
+                let gravityBehavior = UIGravityBehavior(items: [googlyEye.pupilView])
+        
+                let ovalFrame = CGRect(origin: CGPoint(x: center.x - travelRadius, y: center.y - travelRadius),
+                                       size: CGSize(width: travelRadius*2, height: travelRadius*2))
+            print("ovalFrame: \(ovalFrame)")
+                boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
+                boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
+                animator.addBehavior(gravityBehavior)
+                animator.addBehavior(boundaryBehavior)
+                behaviors = ["gravity" : gravityBehavior,
+                             "boundary" : boundaryBehavior]
+            }
     
-    let point = eye.ringLayerCenterPointForManufacturingDefects()
-    let ovalFrame = CGRect(origin: CGPoint(x: point.x - eye.cutoutRadius, y: point.y - eye.cutoutRadius),
-                           size: CGSize(width: eye.cutoutRadius*2, height: eye.cutoutRadius*2))
-    
-    boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
-    boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
-    animator.addBehavior(gravityBehavior)
-    animator.addBehavior(boundaryBehavior)
-    behaviors = ["gravity" : gravityBehavior,
-                 "boundary" : boundaryBehavior]
-  }
-  
-  func update(gravity: CMAcceleration, acceleration: CMAcceleration) {
-    
-    if let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior {
-      
-      let direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
-      gravityBehavior.gravityDirection = direction
-      behaviors["gravity"] = gravityBehavior
-      if (abs(gravity.z) < maxGravity || (abs(acceleration.x) > maxAcceleration || abs(acceleration.y) > maxAcceleration)) {
-        if behaviorsLocked {
-          self.resetBehaviors()
-        }
-        behaviorsLocked = false
-      } else {
-        animator.removeAllBehaviors()
-        behaviorsLocked = true
-      }
-      
-    } else {
-      print("no gravity behavior")
+        func update(gravity: CMAcceleration, acceleration: CMAcceleration) {
+        
+                guard let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior else {return}
+        
+                let direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
+                gravityBehavior.gravityDirection = direction
+                behaviors["gravity"] = gravityBehavior
+                if (abs(gravity.z) < maxGravity || (abs(acceleration.x) > maxAcceleration || abs(acceleration.y) > maxAcceleration)) {
+                    if behaviorsLocked {
+                        if animator.behaviors.count < behaviors.count {
+                            
+                        resetBehaviors()
+                        }
+                        }
+                        behaviorsLocked = false
+                    } else {
+                        animator.removeAllBehaviors()
+                            behaviorsLocked = true
+            }
     }
-  }
   
   private func resetBehaviors() {
-    if animator.behaviors.count < behaviors.count {
       animator.removeAllBehaviors()
       for behavior in behaviors {
         animator.addBehavior(behavior.1)
       }
     }
-  }
 }

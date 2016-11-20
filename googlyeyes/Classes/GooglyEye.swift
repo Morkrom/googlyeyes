@@ -14,8 +14,8 @@ let coreMotionManager = CMMotionManager()
 
 class GooglyEye: UIView {
     
-    static func plasticGrayColor() -> UIColor { return UIColor(colorLiteralRed: 0.99, green: 0.99, blue: 0.99, alpha: 1)//That shitty 'gray' color for clear plastic
-    }
+    class func plasticGrayColor() -> UIColor { return GooglyEye.plasticGrayColor(alpha: 1.0) }//That shitty 'gray' color for clear plastic }
+    class func plasticGrayColor(alpha: CGFloat) -> UIColor { return UIColor(red: 0.99, green: 0.99, blue: 0.99, alpha: alpha) }
     
     static func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
     var cutoutRadius: CGFloat = 0.0
@@ -93,7 +93,9 @@ class GooglyEye: UIView {
     class UpdatingLayer: CALayer {
         var endCenter: CGPoint = .zero
         var startCenter: CGPoint = .zero
-        let innerShadowGradient = CGGradient(colorsSpace: nil, colors: [UIColor.clear.cgColor, GooglyEye.plasticGrayColor().cgColor] as CFArray, locations: nil)
+        let edgeShadowGradient = CGGradient(colorsSpace: nil, colors: [UIColor.clear.cgColor, GooglyEye.plasticGrayColor().cgColor] as CFArray, locations: nil)
+        let innerShadowGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.plasticGrayColor(alpha: 0.2).cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
+
         
         func update(pitchPercent: CGFloat, rollPercent: CGFloat) {
             let abs = fabs(Double(pitchPercent))
@@ -117,12 +119,14 @@ class GooglyEye: UIView {
         override func draw(in ctx: CGContext) {
             super.draw(in: ctx)
             let radius = GooglyEye.cutoutRadius(dimension: bounds.width)
-            ctx.drawRadialGradient(innerShadowGradient!,
+            ctx.drawRadialGradient(edgeShadowGradient!,
                                    startCenter: endCenter,
                                    startRadius: radius - (bounds.width*0.1),
                                    endCenter: startCenter,
-                                   endRadius: radius + (bounds.width*0.02),
+                                   endRadius: radius + (bounds.width*0.035),
                                    options:  .drawsBeforeStartLocation)
+            
+            ctx.drawRadialGradient(innerShadowGradient!, startCenter: endCenter, startRadius: 1, endCenter: endCenter, endRadius: radius*0.666, options: .drawsBeforeStartLocation)
         }
     }
     

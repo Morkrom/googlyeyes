@@ -12,9 +12,7 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		9D94755D1DBDEEBA0035193B /* FloatingRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */; };
 		9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475601DBDEEE80035193B /* GooglyEye.swift */; };
-		9D9475651DBDEFB80035193B /* BevelTop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475641DBDEFB80035193B /* BevelTop.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,9 +27,7 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		75533F5307CF2104A22A2F80 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
-		9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FloatingRingView.swift; path = ../googlyeyes/Classes/FloatingRingView.swift; sourceTree = "<group>"; };
 		9D9475601DBDEEE80035193B /* GooglyEye.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GooglyEye.swift; path = ../googlyeyes/Classes/GooglyEye.swift; sourceTree = "<group>"; };
-		9D9475641DBDEFB80035193B /* BevelTop.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BevelTop.swift; path = ../googlyeyes/Classes/BevelTop.swift; sourceTree = "<group>"; };
 		A1F0ECE2E0FACD8430C19BC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -118,8 +114,6 @@
 			isa = PBXGroup;
 			children = (
 				9D9475601DBDEEE80035193B /* GooglyEye.swift */,
-				9D94755C1DBDEEBA0035193B /* FloatingRingView.swift */,
-				9D9475641DBDEFB80035193B /* BevelTop.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -199,8 +193,6 @@
 			files = (
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
-				9D94755D1DBDEEBA0035193B /* FloatingRingView.swift in Sources */,
-				9D9475651DBDEFB80035193B /* BevelTop.swift in Sources */,
 				9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

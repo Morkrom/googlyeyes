@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'googlyeyes'
   s.version          = '0.1.0'
-  s.summary          = 'Here's looking at you.'
+  s.summary          = 'Here is looking at you.'
   s.description      = 'We all need a little more high level googly eye simulation'
   s.homepage         = 'https://github.com/morkrom/googlyeyes'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'

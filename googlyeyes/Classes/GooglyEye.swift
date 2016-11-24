@@ -42,11 +42,12 @@ class GooglyEye: UIView {
     
     private class func plasticGrayColor() -> UIColor { return GooglyEye.plasticGrayColor(alpha: 1.0) }//That shitty yellowing gray color for degrading clear plastic.
     private class func plasticGrayColor(alpha: CGFloat) -> UIColor { return UIColor(red: 0.99, green: 0.99, blue: 0.99, alpha: alpha) }
-    static func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
+    private static func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
     fileprivate var pupilView = Pupil()
     private var displayLink: CADisplayLink!
     private var animation: GooglyPupilAnimation?
     private let updatedLayer = UpdatingLayer()
+    private var diameter: CGFloat = 0
     
     override class var layerClass: Swift.AnyClass {
         return GooglyPlasticBase.self
@@ -54,32 +55,47 @@ class GooglyEye: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
         backgroundColor = UIColor.clear
         guard let base = layer as? GooglyPlasticBase else {return}
-        pupilView.backgroundColor = UIColor.black
         layer.setNeedsDisplay()
         MotionProvider.shared.motionManager().startDeviceMotionUpdates()
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
         displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
         displayLink.frameInterval = 2
+        pupilView.backgroundColor = UIColor.clear
         addSubview(pupilView)
-        animation = GooglyPupilAnimation(googlyEye: self, center: ringLayerCenterPointForManufacturingDefects(), travelRadius: GooglyEye.cutoutRadius(dimension: bounds.width))
         updatedLayer.anchorPoint = CGPoint(x: 0.0, y: 0.0)
         base.addSublayer(updatedLayer)
+
+        diameter = frame.width > frame.height ? frame.height: frame.width
+        
+        pupilView.frame = CGRect(x: (bounds.width - diameter*pupilDiameterPercentageWidth)/2, y: (bounds.height - diameter*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
+        pupilView.layer.setNeedsDisplay()
+        //layoutSubviews()
+        let ringLayerCenterPoint = ringLayerCenterPointForManufacturingDefects()
+        print("ringLayerCenterPointForManufacturingDefects(): \(ringLayerCenterPoint)")
+        animation = GooglyPupilAnimation(googlyEye: self, center: ringLayerCenterPoint, travelRadius: GooglyEye.cutoutRadius(dimension: bounds.width))
     }
     
     override var frame: CGRect {
         didSet {
-            layer.cornerRadius = frame.width/2
-            pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (frame.height - frame.width*pupilDiameterPercentageWidth)/2, width: frame.width*pupilDiameterPercentageWidth, height: frame.height*pupilDiameterPercentageWidth)
-            updatedLayer.bounds = CGRect(x: -bounds.width/2, y: -bounds.height/2, width: bounds.width, height: bounds.height)
+            diameter = frame.width > frame.height ? frame.height: frame.width
+            layoutSubviews()
         }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+//        pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (diameter - frame.width*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
+//        pupilView.transform = .identity
+//        pupilView.layer.setNeedsDisplay()
+        updatedLayer.bounds = CGRect(x: -bounds.width/2, y: -bounds.height/2, width: diameter, height: diameter)
     }
     
     private func ringLayerCenterPointForManufacturingDefects() -> CGPoint {
         guard let ringLayer = layer as? GooglyPlasticBase else {return .zero}
-        updatedLayer.update(pitchPercent: 0, rollPercent: 0)
+        //updatedLayer.update(pitchPercent: 0, rollPercent: 0)
         return ringLayer.startCenter
     }
     
@@ -118,11 +134,23 @@ class GooglyEye: UIView {
             }
         }
         
-        override var frame: CGRect {
-            didSet {
-                layer.cornerRadius = frame.width/2
+        override class var layerClass: Swift.AnyClass {
+            return PupilLayer.self
+        }
+        
+        class PupilLayer: CALayer {
+            override func draw(in ctx: CGContext) {
+                contentsScale = UIScreen.main.scale
+                super.draw(in: ctx)
+                ctx.setBlendMode(.clear)
+                ctx.clear(bounds)
+                ctx.setBlendMode(.normal)
+                ctx.setFillColor(UIColor.black.cgColor)
+                ctx.addEllipse(in: bounds)
+                ctx.fillPath()
             }
         }
+        
     }
 
     class GooglyPlasticBase: CALayer {
@@ -131,6 +159,11 @@ class GooglyEye: UIView {
         let baseStampGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.plasticGrayColor().cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
         var startCenter: CGPoint = .zero
         
+        override init(layer: Any) {
+            super.init(layer: layer)
+            contentsScale = UIScreen.main.scale // this one is key
+        }
+        
         override init() {
             super.init()
             contentsScale = UIScreen.main.scale // this one is key
@@ -138,8 +171,9 @@ class GooglyEye: UIView {
         
         override var bounds: CGRect {
             didSet {
-                startCenter = CGPoint(x: bounds.width/2 + ((bounds.width/2*0.1) * randomPercent()),
-                                      y: bounds.height/2 + ((bounds.height/2*0.1) * randomPercent()))
+                let diameter = bounds.width > bounds.height ? bounds.height: bounds.width
+                startCenter = CGPoint(x: diameter/2 + ((diameter/2*0.1) * randomPercent()),
+                                      y: diameter/2 + ((diameter/2*0.1) * randomPercent()))
             }
         }
         

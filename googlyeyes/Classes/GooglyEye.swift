@@ -8,22 +8,6 @@
 
 import Foundation
 import UIKit
-import CoreMotion
-
-class MotionProvider {
-
-    static let shared = MotionProvider()
-    var coreMotionManager: CMMotionManager? // set this before initializing an eye
-    
-    func motionManager() -> CMMotionManager {
-        if let mm = coreMotionManager {
-            return mm
-        } else {
-            coreMotionManager = CMMotionManager()
-            return coreMotionManager!
-        }
-    }
-}
 
 enum Mode {
     case performant
@@ -38,64 +22,71 @@ class GooglyEye: UIView {
         }
     }
     
-    var mode: Mode = .performant //default to performance
+    var mode: Mode = .performant
     
+    var pupilView = Pupil()
     private class func plasticGrayColor() -> UIColor { return GooglyEye.plasticGrayColor(alpha: 1.0) }//That shitty yellowing gray color for degrading clear plastic.
     private class func plasticGrayColor(alpha: CGFloat) -> UIColor { return UIColor(red: 0.99, green: 0.99, blue: 0.99, alpha: alpha) }
-    private static func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
-    fileprivate var pupilView = Pupil()
+    private class func cutoutRadius(dimension: CGFloat) -> CGFloat {return dimension/2 * 0.85}
+    private class func diameter(rectSize: CGSize) -> CGFloat { return rectSize.width > rectSize.height ? rectSize.height : rectSize.width }
+    
     private var displayLink: CADisplayLink!
-    private var animation: GooglyPupilAnimation?
+    private var animation: PupilAnimation?
     private let updatedLayer = UpdatingLayer()
     private var diameter: CGFloat = 0
-    
+    private var orientation = UIApplication.shared.statusBarOrientation
+  
     override class var layerClass: Swift.AnyClass {
-        return GooglyPlasticBase.self
+        return PlasticBase.self
     }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = UIColor.clear
-        guard let base = layer as? GooglyPlasticBase else {return}
-        layer.setNeedsDisplay()
-        MotionProvider.shared.motionManager().startDeviceMotionUpdates()
+
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
         displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
         displayLink.frameInterval = 2
+
+        backgroundColor = UIColor.clear
         pupilView.backgroundColor = UIColor.clear
         addSubview(pupilView)
         updatedLayer.anchorPoint = CGPoint(x: 0.0, y: 0.0)
-        base.addSublayer(updatedLayer)
+        (layer as! PlasticBase).addSublayer(updatedLayer)
 
-        diameter = frame.width > frame.height ? frame.height: frame.width
-        
+        diameter = GooglyEye.diameter(rectSize: frame.size)
+        updatedLayer.update(pitchPercent: 0, rollPercent: 0)// Centered
         pupilView.frame = CGRect(x: (bounds.width - diameter*pupilDiameterPercentageWidth)/2, y: (bounds.height - diameter*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
         pupilView.layer.setNeedsDisplay()
-        //layoutSubviews()
         let ringLayerCenterPoint = ringLayerCenterPointForManufacturingDefects()
-        print("ringLayerCenterPointForManufacturingDefects(): \(ringLayerCenterPoint)")
-        animation = GooglyPupilAnimation(googlyEye: self, center: ringLayerCenterPoint, travelRadius: GooglyEye.cutoutRadius(dimension: bounds.width))
+        animation = PupilAnimation(googlyEye: self, center: ringLayerCenterPoint, travelRadius: GooglyEye.cutoutRadius(dimension: bounds.width))
+        
+        layer.setNeedsDisplay()
     }
     
     override var frame: CGRect {
         didSet {
-            diameter = frame.width > frame.height ? frame.height: frame.width
+            diameter = GooglyEye.diameter(rectSize: frame.size)
             layoutSubviews()
         }
     }
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        
-//        pupilView.frame = CGRect(x: (frame.width - frame.width*pupilDiameterPercentageWidth)/2, y: (diameter - frame.width*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
-//        pupilView.transform = .identity
-//        pupilView.layer.setNeedsDisplay()
         updatedLayer.bounds = CGRect(x: -bounds.width/2, y: -bounds.height/2, width: diameter, height: diameter)
+        let currentOrientation = UIApplication.shared.statusBarOrientation
+        if orientation != currentOrientation {
+            orientation = currentOrientation
+            switch orientation {
+            case .landscapeLeft: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI_2)))
+            case .landscapeRight: layer.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(M_PI_2)))
+            case .portraitUpsideDown: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI)))
+            default: layer.setAffineTransform(.identity)
+            }
+        }
     }
     
     private func ringLayerCenterPointForManufacturingDefects() -> CGPoint {
-        guard let ringLayer = layer as? GooglyPlasticBase else {return .zero}
-        //updatedLayer.update(pitchPercent: 0, rollPercent: 0)
+        guard let ringLayer = layer as? PlasticBase else {return .zero}
         return ringLayer.startCenter
     }
     
@@ -139,21 +130,26 @@ class GooglyEye: UIView {
         }
         
         class PupilLayer: CALayer {
-            override func draw(in ctx: CGContext) {
+            override init() {
+                super.init()
                 contentsScale = UIScreen.main.scale
+            }
+            
+            required init?(coder aDecoder: NSCoder) {
+                fatalError("init(coder:) has not been implemented")
+            }
+            
+            override func draw(in ctx: CGContext) {
                 super.draw(in: ctx)
-                ctx.setBlendMode(.clear)
-                ctx.clear(bounds)
-                ctx.setBlendMode(.normal)
                 ctx.setFillColor(UIColor.black.cgColor)
-                ctx.addEllipse(in: bounds)
+                let diameter = GooglyEye.diameter(rectSize: frame.size)
+                ctx.addEllipse(in: CGRect(origin: bounds.origin, size: CGSize(width: diameter, height: diameter)))
                 ctx.fillPath()
             }
         }
-        
     }
 
-    class GooglyPlasticBase: CALayer {
+    class PlasticBase: CALayer {
         let grayColor = UIColor(colorLiteralRed: 0.83, green: 0.83, blue: 0.8, alpha: 1.0).cgColor
         let stampPercentSizeDifference: CGFloat = 0.1
         let baseStampGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.plasticGrayColor().cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
@@ -171,7 +167,7 @@ class GooglyEye: UIView {
         
         override var bounds: CGRect {
             didSet {
-                let diameter = bounds.width > bounds.height ? bounds.height: bounds.width
+                let diameter = GooglyEye.diameter(rectSize: bounds.size)
                 startCenter = CGPoint(x: diameter/2 + ((diameter/2*0.1) * randomPercent()),
                                       y: diameter/2 + ((diameter/2*0.1) * randomPercent()))
             }
@@ -221,6 +217,11 @@ class GooglyEye: UIView {
             setNeedsDisplay()
         }
         
+        override init(layer: Any) {
+            super.init(layer: layer)
+            contentsScale = UIScreen.main.scale
+        }
+        
         override init() {
             super.init()
             contentsScale = UIScreen.main.scale // this one is key
@@ -235,59 +236,7 @@ class GooglyEye: UIView {
             let radius = GooglyEye.cutoutRadius(dimension: bounds.width)
             ctx.drawRadialGradient(edgeShadowGradient!, startCenter: endCenter, startRadius: radius - (bounds.width*0.1),
                                    endCenter: startCenter, endRadius: radius + (bounds.width*0.035), options:  .drawsBeforeStartLocation)
-            ctx.drawRadialGradient(innerShadowGradient!, startCenter: endCenter, startRadius: 1, endCenter: endCenter, endRadius: radius*0.666, options: .drawsBeforeStartLocation)
-        }
-    }
-}
-
-private class GooglyPupilAnimation {
-    
-    private let animator: UIDynamicAnimator
-    private var behaviors: [String:UIDynamicBehavior]
-    private var behaviorsLocked = false
-    private let accM = 13.0
-    private let gvM = 2.5
-    private let maxGravity = 0.95
-    private let maxAcceleration = 0.03
-    
-    init(googlyEye: GooglyEye, center: CGPoint, travelRadius: CGFloat) {
-        
-        animator = UIDynamicAnimator(referenceView: googlyEye)
-        let boundaryBehavior = UICollisionBehavior(items: [googlyEye.pupilView])
-        let gravityBehavior = UIGravityBehavior(items: [googlyEye.pupilView])
-        let ovalFrame = CGRect(origin: CGPoint(x: center.x - travelRadius, y: center.y - travelRadius),
-                               size: CGSize(width: travelRadius*2, height: travelRadius*2))
-        boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
-        boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
-        animator.addBehavior(gravityBehavior)
-        animator.addBehavior(boundaryBehavior)
-        behaviors = ["gravity" : gravityBehavior,
-                     "boundary" : boundaryBehavior]
-    }
-    
-    func update(gravity: CMAcceleration, acceleration: CMAcceleration) {
-        
-        guard let gravityBehavior = behaviors["gravity"] as? UIGravityBehavior else {return}
-        let direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
-        gravityBehavior.gravityDirection = direction
-        behaviors["gravity"] = gravityBehavior
-        if (abs(gravity.z) < maxGravity || (abs(acceleration.x) > maxAcceleration || abs(acceleration.y) > maxAcceleration)) {
-            if behaviorsLocked {
-                if animator.behaviors.count < behaviors.count {
-                    resetBehaviors()
-                }
-            }
-            behaviorsLocked = false
-        } else {
-            animator.removeAllBehaviors()
-            behaviorsLocked = true
-        }
-    }
-    
-    private func resetBehaviors() {
-        animator.removeAllBehaviors()
-        for behavior in behaviors {
-            animator.addBehavior(behavior.1)
+            ctx.drawRadialGradient(innerShadowGradient!, startCenter: endCenter, startRadius: 1, endCenter: endCenter, endRadius: radius*0.4, options: .drawsBeforeStartLocation)
         }
     }
 }

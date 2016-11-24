@@ -12,6 +12,8 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
+		9D73759D1DE6C06F00EACC96 /* MotionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D73759C1DE6C06F00EACC96 /* MotionProvider.swift */; };
+		9D73759F1DE6C12C00EACC96 /* PupilAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D73759E1DE6C12C00EACC96 /* PupilAnimation.swift */; };
 		9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D9475601DBDEEE80035193B /* GooglyEye.swift */; };
 /* End PBXBuildFile section */
 
@@ -27,6 +29,8 @@
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		75533F5307CF2104A22A2F80 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		9D73759C1DE6C06F00EACC96 /* MotionProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MotionProvider.swift; path = ../googlyeyes/Classes/MotionProvider.swift; sourceTree = "<group>"; };
+		9D73759E1DE6C12C00EACC96 /* PupilAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PupilAnimation.swift; path = ../googlyeyes/Classes/PupilAnimation.swift; sourceTree = "<group>"; };
 		9D9475601DBDEEE80035193B /* GooglyEye.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GooglyEye.swift; path = ../googlyeyes/Classes/GooglyEye.swift; sourceTree = "<group>"; };
 		A1F0ECE2E0FACD8430C19BC0 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -114,6 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				9D9475601DBDEEE80035193B /* GooglyEye.swift */,
+				9D73759C1DE6C06F00EACC96 /* MotionProvider.swift */,
+				9D73759E1DE6C12C00EACC96 /* PupilAnimation.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -191,6 +197,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9D73759F1DE6C12C00EACC96 /* PupilAnimation.swift in Sources */,
+				9D73759D1DE6C06F00EACC96 /* MotionProvider.swift in Sources */,
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 				9D9475611DBDEEE80035193B /* GooglyEye.swift in Sources */,

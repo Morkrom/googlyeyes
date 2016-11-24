@@ -19,14 +19,16 @@ class ViewController: UIViewController {
         view.addSubview(leftEye)
         view.addSubview(rightEye)
         
+        leftEye.pupilDiameterPercentageWidth = 0.1
+        
         // utilize "pitch and roll" update function on device pitch and roll
         leftEye.mode = .immersive
     }
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        leftEye.frame = CGRect(x: (view.bounds.width - 100.0 - 100 - 100)/2.0, y: view.bounds.width*(1.0 - 0.618) - 50.0, width: 100, height: 100.0)
-        rightEye.frame = CGRect(x: (view.bounds.width - 100 + 100 + 100)/2.0, y: view.bounds.width*(1.0 - 0.618) - 50.0, width: 100, height: 100.0)
+        leftEye.frame = CGRect(x: (view.bounds.width - 100.0 - 100 - 100)/2.0, y: view.bounds.width*(1.0 - 0.618) - 50.0, width: 150, height: 100.0)
+        rightEye.frame = CGRect(x: (view.bounds.width - 100 + 100 + 100)/2.0, y: view.bounds.width*(1.0 - 0.618) - 50.0, width: 100, height: 150.0)
     }
     
     override func didReceiveMemoryWarning() {

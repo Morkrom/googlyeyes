@@ -44,7 +44,6 @@ class GooglyEye: UIView {
         displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode)
         displayLink.frameInterval = 2
 
-        backgroundColor = UIColor.clear
         pupilView.backgroundColor = UIColor.clear
 
         diameter = GooglyEye.diameterFromFrame(rectSize: frame.size)
@@ -143,7 +142,6 @@ class GooglyEye: UIView {
     }
 
     class BaseCutout: CALayer {
-        let grayColor = UIColor(colorLiteralRed: 0.83, green: 0.83, blue: 0.8, alpha: 1.0).cgColor
         let stampPercentSizeDifference: CGFloat = 0.1
         let baseStampGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.plasticGrayColor().cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
         var startCenter: CGPoint = .zero
@@ -179,8 +177,8 @@ class GooglyEye: UIView {
             super.draw(in: ctx)
             ctx.setShouldAntialias(true)
             ctx.setAllowsAntialiasing(true)
-            ctx.setBlendMode(.clear)
-            ctx.clear(bounds)
+//            ctx.setBlendMode(.clear)
+//            ctx.clear(bounds)
             ctx.setBlendMode(.normal)
             ctx.setFillColor(GooglyEye.plasticGrayColor().cgColor)
             let path = CGPath(ellipseIn: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: diameter, height: diameter)), transform: nil)

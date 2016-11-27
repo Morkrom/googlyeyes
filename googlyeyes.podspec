@@ -8,9 +8,9 @@
 
 Pod::Spec.new do |s|
   s.name             = 'googlyeyes'
-  s.version          = '0.1.2'
+  s.version          = '0.9.0'
   s.summary          = 'Here is looking at you.'
-  s.description      = 'We all need a little more high level googly eye simulation'
+  s.description      = 'UIKit was short a decent googly eye'
   s.homepage         = 'https://github.com/morkrom/googlyeyes'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }

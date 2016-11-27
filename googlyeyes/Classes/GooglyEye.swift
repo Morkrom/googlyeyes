@@ -49,21 +49,7 @@ class GooglyEye: UIView {
         animation = PupilBehaviorManager(googlyEye: self, center: baseCutout.startCenter, travelRadius: diameter)
         updateDimensions()
     }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        let currentOrientation = UIApplication.shared.statusBarOrientation
-        if orientation != currentOrientation {
-            orientation = currentOrientation
-            switch orientation {
-            case .landscapeLeft: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI_2)))
-            case .landscapeRight: layer.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(M_PI_2)))
-            case .portraitUpsideDown: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI)))
-            default: layer.setAffineTransform(.identity)
-            }
-        }
-    }
-    
+
     private func updateDimensions() {
         diameter = GooglyEye.diameterFromFrame(rectSize: frame.size)
         baseCutout.frame = CGRect(x: 0, y: 0, width: diameter, height: diameter)
@@ -79,12 +65,6 @@ class GooglyEye: UIView {
         baseCutout.setNeedsDisplay()
         innerStamp.setNeedsDisplay()
         animation?.updateBehaviors(googlyEye: self, center: baseCutout.startCenter, travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
-    }
-    
-    override var frame: CGRect {
-        didSet {
-            updateDimensions()
-        }
     }
     
     private func adjustPupilForNewWidth() {
@@ -104,6 +84,27 @@ class GooglyEye: UIView {
         animation?.update(gravity: motion.gravity, acceleration: motion.userAcceleration)
         if mode == .immersive {
             innerStamp.update(pitchPercent:pitchPercent, rollPercent: rollPercent)
+            innerStamp.setNeedsDisplay()
+        }
+    }
+    
+    override var frame: CGRect {
+        didSet {
+            updateDimensions()
+        }
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let currentOrientation = UIApplication.shared.statusBarOrientation
+        if orientation != currentOrientation {
+            orientation = currentOrientation
+            switch orientation {
+            case .landscapeLeft: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI_2)))
+            case .landscapeRight: layer.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(M_PI_2)))
+            case .portraitUpsideDown: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI)))
+            default: layer.setAffineTransform(.identity)
+            }
         }
     }
     

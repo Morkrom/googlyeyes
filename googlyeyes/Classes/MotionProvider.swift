@@ -12,7 +12,7 @@ import CoreMotion
 class MotionProvider {
     
     static let shared = MotionProvider()
-    var coreMotionManager: CMMotionManager? // set this before initializing an eye
+    var coreMotionManager: CMMotionManager? // set this before initializing an eye if your app has its own instance of CMMotionManager
     
     func motionManager() -> CMMotionManager {
         if let mm = coreMotionManager {

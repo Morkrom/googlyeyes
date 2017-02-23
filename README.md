@@ -9,7 +9,7 @@
 
 ## Life is short
 
-Spread cheer and stereoscopic anthropomorphism in all screen orientations. Demonstrate the power of Apple's abstractions provided by UIKit, CALayer, and CoreMotion to your mobile team.
+Spread cheer and stereoscopic anthropomorphism in all screen orientations. Demonstrate the power of Apple's abstractions provided by UIKit, CALayer, and CoreMotion to your organization!
 
 ## Usage
 

@@ -9,11 +9,6 @@
 import Foundation
 import UIKit
 
-enum Mode {
-    case performant
-    case immersive
-}
-
 class GooglyEye: UIView {
     
     var pupilDiameterPercentageWidth: CGFloat = 0.5 {
@@ -22,7 +17,6 @@ class GooglyEye: UIView {
         }
     }
     
-    var mode: Mode = .performant
     var pupil = Pupil()
     
     private class func yellowingGrayColor() -> UIColor {return GooglyEye.yellowingGrayColor(alpha: 1.0)}//ellowing gray color for the aging paper.
@@ -40,7 +34,7 @@ class GooglyEye: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link)) //initialization
-        displayLink.add(to: RunLoop.main, forMode: .defaultRunLoopMode) //properties
+        displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default) //properties
         displayLink.frameInterval = 2
         addSubview(pupil)
         layer.addSublayer(baseCutout)
@@ -59,9 +53,10 @@ class GooglyEye: UIView {
             adjustPupilForNewWidth()
             pupil.layer.setNeedsDisplay()
         }
-        if mode == .performant {
-            innerStamp.update(pitchPercent: 0, rollPercent: 0)
-        }
+        
+
+        innerStamp.update()
+
         baseCutout.setNeedsDisplay()
         innerStamp.setNeedsDisplay()
         animation?.updateBehaviors(googlyEye: self, center: baseCutout.startCenter, travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
@@ -77,15 +72,9 @@ class GooglyEye: UIView {
         pupil.frame = CGRect(x: pupil.frame.minX - (pupil.frame.width - diameter*pupilDiameterPercentageWidth)/2, y: pupil.frame.minY - (pupil.frame.height - diameter*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
     }
     
-    func link(link: CADisplayLink) {
+    @objc func link(link: CADisplayLink) {
         guard let motion = MotionProvider.shared.motionManager().deviceMotion else {return}
-        let pitchPercent = CGFloat(motion.attitude.pitch)/CGFloat(1.5)
-        let rollPercent = CGFloat(motion.attitude.roll)/CGFloat(1.5)
         animation?.update(gravity: motion.gravity, acceleration: motion.userAcceleration)
-        if mode == .immersive {
-            innerStamp.update(pitchPercent:pitchPercent, rollPercent: rollPercent)
-            innerStamp.setNeedsDisplay()
-        }
     }
     
     override var frame: CGRect {
@@ -100,9 +89,10 @@ class GooglyEye: UIView {
         if orientation != currentOrientation {
             orientation = currentOrientation
             switch orientation {
-            case .landscapeLeft: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI_2)))
-            case .landscapeRight: layer.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(M_PI_2)))
-            case .portraitUpsideDown: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(M_PI)))
+            case .landscapeLeft:
+                layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(Double.pi/2)))
+            case .landscapeRight: layer.setAffineTransform(CGAffineTransform(rotationAngle: -CGFloat(Double.pi/2)))
+            case .portraitUpsideDown: layer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat(Double.pi)))
             default: layer.setAffineTransform(.identity)
             }
         }
@@ -119,10 +109,8 @@ class GooglyEye: UIView {
         let edgeShadowGradient = CGGradient(colorsSpace: nil, colors: [UIColor.clear.cgColor, GooglyEye.yellowingGrayColor().cgColor] as CFArray, locations: nil)
         let innerShadowGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.yellowingGrayColor(alpha: 0.2).cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
         
-        func update(pitchPercent: CGFloat, rollPercent: CGFloat) {
-            let abs = fabs(Double(pitchPercent))
-            if abs > 1.0 || abs < 0.0 || abs > 1.0 || abs < 0.0 {return}
-            endCenter = CGPoint(x: startCenter.x + (rollPercent*10.0), y: startCenter.y + (pitchPercent*10.0))
+        func update() {
+            endCenter = CGPoint(x: startCenter.x, y: startCenter.y)
         }
         
         override init(layer: Any) {

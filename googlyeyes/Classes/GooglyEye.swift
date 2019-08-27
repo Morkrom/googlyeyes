@@ -11,7 +11,7 @@ import UIKit
 
 class GooglyEye: UIView {
     
-    var pupilDiameterPercentageWidth: CGFloat = 0.5 {
+    var pupilDiameterPercentageWidth: CGFloat = 0.58 {
         didSet {
             updateDimensions()
         }
@@ -19,7 +19,7 @@ class GooglyEye: UIView {
     
     var pupil = Pupil()
     
-    private class func grayColor() -> UIColor {return GooglyEye.paperGray(alpha: 1.0)}
+    private class func grayColor() -> UIColor { return GooglyEye.paperGray(alpha: 1.0) }
     private class func paperGray(alpha: CGFloat) -> UIColor {return
         UIColor(red: 0.99, green: 0.99, blue: 0.99, alpha: alpha)}
     
@@ -89,8 +89,13 @@ class GooglyEye: UIView {
         pupil.frame = CGRect(x: pupil.frame.minX - (pupil.frame.width - diameter*pupilDiameterPercentageWidth)/2, y: pupil.frame.minY - (pupil.frame.height - diameter*pupilDiameterPercentageWidth)/2, width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth)
     }
     
+    let motionManager = MotionProvider.shared.motionManager()
     @objc func link(link: CADisplayLink) {
-        guard let motion = MotionProvider.shared.motionManager().deviceMotion else {return}
+//        motionManager.deviceMotion?.rotationRate
+        guard let motion = motionManager.deviceMotion else {return}
+        
+//        print("\(motion.rotationRate)")
+        
         animation?.update(gravity: motion.gravity, acceleration: motion.userAcceleration)
     }
     

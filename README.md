@@ -7,50 +7,46 @@
 
 ![alt tag](eyes-gif-vid.gif)
 
-## Life is short
+## A Classic
 
-Spread cheer and stereoscopic anthropomorphism in all screen orientations. Demonstrate the power of Apple's abstractions provided by UIKit, CALayer, and CoreMotion to your organization!
+Combine Apple's UIKitDynamics and CoreMotion frameworks to bring this classic anthropomorphic motif to life on iOS
 
 ## Usage
 
-Pretty standard, really.
+#### Initialize
+
+##### CGRect
 
     let leftEye = GooglyEye(frame: CGRect(x: 30, y: 300, width: 100, height: 100))
-    myAppsview.addSubview(leftEye)
 
-If you want a 3-D effect, consider the mode property, which defaults to .performant. Setting it to .immersive enables pitch and roll on the 'sheen' which 'encloses' the pupil view.
+##### Autolayout
+##### Remember to set a constraint for the width or height 
 
-	leftEye.mode = .immersive
+    let rightEye = GooglyEye.autolayout()
+    
+
+#### Configure
 
 Make adjustments to the pupil width as a percentage of its respective sclera's diameter.
-    
-    leftEye.pupilDiameterPercentageWidth = 0.6
 
-If your app has an existing instance of CMMotionManager, be certain to set your app's instance of it on the MotionProvider class before allocationg any GooglyEyes like so:
-
-    MotionProvider.shared.coreMotionManager = myAppsMotionManager
-    //.. create GooglyEyes
+    leftEye.pupilDiameterPercentageWidth = 0.1
 
 ## Example
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+To run the example project, clone this repo and run `pod install` from the Example directory first.
 
 ## Requirements
 
-iOS 9.0
+iOS 12.0
 
 ## Installation
 
 googlyeyes is available through [CocoaPods](http://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
-```ruby
+```
 pod "googlyeyes"
 ```
-
-## Author
-Michael Mork, morkrom@protonmail.ch
-Email me!
 
 ## License
 

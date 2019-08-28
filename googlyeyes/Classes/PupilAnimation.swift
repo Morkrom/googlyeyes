@@ -68,8 +68,9 @@ class PupilBehaviorManager: NSObject {
         
         if acceleration.z > 0 {
             friction.strength = 0
-            direction = CGVector(dx: gravity.x * gvM + acceleration.x*accM*acceleration.z,
-                                 dy: -gravity.y * gvM + acceleration.y*accM*acceleration.z)
+            let z = acceleration.z
+            direction = CGVector(dx: gravity.x * gvM + acceleration.x*accM*(z*z),
+                                 dy: -gravity.y * gvM + acceleration.y*accM*(z*z))
             
             gravityBehavior.direction = direction
         } else {

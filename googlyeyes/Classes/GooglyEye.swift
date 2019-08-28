@@ -11,7 +11,7 @@ import UIKit
 
 class GooglyEye: UIView {
     
-    var pupilDiameterPercentageWidth: CGFloat = 0.58 {
+    var pupilDiameterPercentageWidth: CGFloat = 0.62 {
         didSet {
             updateDimensions()
         }

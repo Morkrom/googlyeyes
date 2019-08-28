@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'googlyeyes'
-  s.version          = '0.9.0'
+  s.version          = '0.9.1'
   s.summary          = 'Here is looking at you.'
   s.description      = 'UIKit was short a decent googly eye'
   s.homepage         = 'https://github.com/morkrom/googlyeyes'
@@ -18,6 +18,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/morkrom/googlyeyes.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/googly-eyes'
   s.ios.deployment_target = '9.0'
+  s.swift_version    = '5.0'
   s.source_files = 'googlyeyes/Classes/**/*'
   
 end

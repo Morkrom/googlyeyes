@@ -6,7 +6,7 @@
 
 ![alt tag](eyes-gif-vid.gif)
 
-## A Classic
+## Enjoy
 
 Combine Apple's UIKitDynamics and CoreMotion frameworks for fun on iOS
 

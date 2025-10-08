@@ -2,7 +2,7 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 
-public struct GooglyISwiftUI: UIViewRepresentable {
+public struct GooglyEyeSwiftUI: UIViewRepresentable {
     
     let size: CGSize
 

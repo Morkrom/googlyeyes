@@ -2,14 +2,19 @@
 // https://docs.swift.org/swift-book
 import SwiftUI
 
-@available(iOS 13.0, *)
-struct GooglyISwiftUI: UIViewRepresentable {
+public struct GooglyISwiftUI: UIViewRepresentable {
     
-    func makeUIView(context: Context) -> GooglyEye {
-        return GooglyEye(frame: .init(x: 0, y: 0, width: 40, height: 40))
+    let size: CGSize
+
+    public init(size: CGSize) {
+        self.size = size
     }
     
-    func updateUIView(_ uiView: GooglyEye, context: Context) {
+    public func makeUIView(context: Context) -> GooglyEye {
+        return GooglyEye(frame: .init(x: 0, y: 0, width: size.width, height: size.height))
+    }
+    
+    public func updateUIView(_ uiView: GooglyEye, context: Context) {
         
     }
 }

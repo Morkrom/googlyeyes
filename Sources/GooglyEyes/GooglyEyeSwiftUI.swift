@@ -18,21 +18,3 @@ public struct GooglyEyeSwiftUI: UIViewRepresentable {
         
     }
 }
-
-class EyeContainerView: UIView {
-    
-    private let eye = GooglyEye()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        addSubview(eye)
-        eye.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
-        eye.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        eye.widthAnchor.constraint(equalToConstant: frame.width).isActive = true
-        eye.heightAnchor.constraint(equalToConstant: frame.height).isActive = true
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}

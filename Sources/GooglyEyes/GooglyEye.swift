@@ -38,6 +38,19 @@ public class GooglyEye: UIView {
     private var baseCutout = Sclera()
     private let innerStamp = HeatStamp()
     
+    var percentilePupilMoved: CGPoint = .zero {
+        didSet {
+            animation?.stop()
+            let pupilX = (center.x - pupil.bounds.width)/2
+            let pupilY = (center.y - pupil.bounds.height)/2)
+
+            pupil.frame = .init(origin: .init(x: pupilX + percentilePupilMoved.x*pupilX,
+                                              y: pupilY + percentilePupilMoved.y*pupilY,
+                                size: pupil.bounds.size)
+
+        }
+    }
+    
     public override init(frame: CGRect) {
         super.init(frame: frame)
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))

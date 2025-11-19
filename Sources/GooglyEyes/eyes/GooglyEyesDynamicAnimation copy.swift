@@ -26,7 +26,7 @@ class GooglyEyesDynamicAnimation: NSObject {
     private weak var googlyEye: GooglyEye?
     
     func stop() {
-        animator.removeAllBehaviors()
+        animator.stopDeviceMotionUpdates()
     }
     
     init(motionManager: CMMotionManager,

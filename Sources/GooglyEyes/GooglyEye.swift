@@ -42,7 +42,7 @@ public class GooglyEye: UIView {
         didSet {
             animation?.stop()
             let pupilX = (center.x - pupil.bounds.width)/2
-            let pupilY = (center.y - pupil.bounds.height)/2)
+            let pupilY = (center.y - pupil.bounds.height)/2
 
             pupil.frame = .init(origin: .init(x: pupilX + percentilePupilMoved.x*pupilX,
                                               y: pupilY + percentilePupilMoved.y*pupilY,

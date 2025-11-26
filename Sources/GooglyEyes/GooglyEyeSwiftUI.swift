@@ -5,10 +5,11 @@ import SwiftUI
 public struct GooglyEyeSwiftUI: UIViewRepresentable {
     
     private let size: CGSize
-    @Binding private var percentilePupilMoved: CGPoint
+    
+    @Binding private var percentilePupilMoved: CGPoint?
 
     public init(size: CGSize,
-                percentilePupilMoved: Binding<CGPoint>) {
+                percentilePupilMoved: Binding<CGPoint?>) {
         self.size = size
         self._percentilePupilMoved = percentilePupilMoved
     }
@@ -18,6 +19,8 @@ public struct GooglyEyeSwiftUI: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: GooglyEye, context: Context) {
-        uiView.percentilePupilMoved = percentilePupilMoved
+        if let pp = percentilePupilMoved {
+            uiView.percentilePupilMoved = pp
+        }
     }
 }

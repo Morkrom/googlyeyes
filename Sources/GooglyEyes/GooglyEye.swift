@@ -40,29 +40,34 @@ public class GooglyEye: UIView {
     
     var percentilePupilMoved: CGPoint = .zero {
         didSet {
+            displayLink?.remove(from: .main, forMode: .default)
+            displayLink = nil
             animation?.stop()
-            let pupilX = (center.x - pupil.bounds.width)/2
-            let pupilY = (center.y - pupil.bounds.height)/2
+            animation = nil
+            let pupilCenterXOffsetted = (diameter - diameter*pupilDiameterPercentageWidth)/2
 
-            pupil.frame = .init(origin: .init(x: pupilX + percentilePupilMoved.x*pupilX,
-                                              y: pupilY + percentilePupilMoved.y*pupilY,
-                                size: pupil.bounds.size)
+            let minY = percentilePupilMoved.y < -1 ? -1 : percentilePupilMoved.y
+            let minX = percentilePupilMoved.x < -1 ? -1 : percentilePupilMoved.x
+            
+            let sanitizedX = percentilePupilMoved.x > 1 ? 1 : minX
+            let sanitizedY = percentilePupilMoved.y > 1 ? 1 : minY
 
+            let newPupilOrigin: CGPoint = .init(x: pupilCenterXOffsetted + sanitizedX*pupilCenterXOffsetted,
+                                       y: pupilCenterXOffsetted + sanitizedY*pupilCenterXOffsetted)
+            UIView.animate(withDuration: 0.15) { [weak self] in
+                guard let self else {
+                    return
+                }
+                pupil.frame = .init(origin: newPupilOrigin,
+                                    size: .init(width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth))
+            }
         }
     }
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
-        displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
-        displayLink.preferredFramesPerSecond = 32
-        layer.addSublayer(baseCutout)
-        addSubview(pupil)
-        layer.addSublayer(innerStamp)
-        self.animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
-                                                    googlyEye: self,
-                                                    center: baseCutout.startCenter,
-                                                    travelRadius: diameter)
+        doCommonConfig()
         updateDimensions()
     }
     
@@ -70,6 +75,11 @@ public class GooglyEye: UIView {
         super.init(frame: .zero)
         translatesAutoresizingMaskIntoConstraints = false
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
+        doCommonConfig()
+        updateDimensions()
+    }
+
+    private func doCommonConfig() {
         displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
         displayLink.preferredFramesPerSecond = 32
         layer.addSublayer(baseCutout)
@@ -80,16 +90,14 @@ public class GooglyEye: UIView {
                                                     googlyEye: self,
                                                     center: baseCutout.startCenter,
                                                     travelRadius: diameter)
-        updateDimensions()
     }
-
 
     private func updateDimensions() {
         guard animation != nil else {
             return
         }
         
-        diameter = GooglyEye.diameterFromFrame(rectSize: frame.size)
+        diameter = GooglyEye.diameterFromFrame(rectSize: bounds.size)
         
         baseCutout.frame = CGRect(x: 0, y: 0, width: diameter, height: diameter)
         innerStamp.startCenter = baseCutout.startCenter
@@ -127,12 +135,14 @@ public class GooglyEye: UIView {
     public override func layoutIfNeeded() {
         super.layoutIfNeeded()
         
-        animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
-                                               googlyEye: self,
-                                               center: baseCutout.startCenter,
-                                               travelRadius: diameter)
+        if percentilePupilMoved != .zero {
+            animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
+                                                   googlyEye: self,
+                                                   center: baseCutout.startCenter,
+                                                   travelRadius: diameter)
+            updateDimensions()
+        }
         
-        updateDimensions()
     }
     
     public override func layoutSubviews() {

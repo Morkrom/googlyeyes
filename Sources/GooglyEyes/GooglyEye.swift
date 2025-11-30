@@ -44,7 +44,9 @@ public class GooglyEye: UIView {
             displayLink = nil
             animation?.stop()
             animation = nil
-            let pupilCenterXOffsetted = (diameter - diameter*pupilDiameterPercentageWidth)/2
+            
+            let pupilD = diameter*pupilDiameterPercentageWidth
+            let pupilCenterXOffsetted = (diameter - pupilD)/2
 
             let minY = percentilePupilMoved.y < -1 ? -1 : percentilePupilMoved.y
             let minX = percentilePupilMoved.x < -1 ? -1 : percentilePupilMoved.x
@@ -52,8 +54,9 @@ public class GooglyEye: UIView {
             let sanitizedX = percentilePupilMoved.x > 1 ? 1 : minX
             let sanitizedY = percentilePupilMoved.y > 1 ? 1 : minY
 
-            let newPupilOrigin: CGPoint = .init(x: pupilCenterXOffsetted + sanitizedX*pupilCenterXOffsetted,
-                                       y: pupilCenterXOffsetted + sanitizedY*pupilCenterXOffsetted)
+            let newPupilOrigin: CGPoint = .init(x: sanitizedX*pupilCenterXOffsetted + pupilCenterXOffsetted,
+                                                y: sanitizedY*pupilCenterXOffsetted + pupilCenterXOffsetted)
+            
             UIView.animate(withDuration: 0.15) { [weak self] in
                 guard let self else {
                     return

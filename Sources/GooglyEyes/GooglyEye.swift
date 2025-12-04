@@ -43,10 +43,6 @@ public class GooglyEye: UIView {
             
             displayLink?.remove(from: .main, forMode: .default)
             displayLink = nil
-//            displayLink?.remove(from: .main, forMode: .default)
-//            displayLink = nil
-//            animation?.stop()
-//            animation = nil
             
             var saniX = percentilePupilMoved.x
             
@@ -63,25 +59,7 @@ public class GooglyEye: UIView {
                 saniY = -1
             }
             
-            /*
-            
-            let pupilD = diameter*pupilDiameterPercentageWidth*0.97
-            let pupilCenterXOffsetted = (diameter - pupilD)/2
-
-            print("::: saniX: \(saniX), saniY: \(saniY)")
-            let newPupilOrigin: CGPoint = .init(x: pupilD/2*saniX,//+ pupilCenterXOffsetted,
-                                                y: pupilD/2*saniY)// + pupilD/2)
-            
-            UIView.animate(withDuration: 0.15) { [weak self] in
-                guard let self else {
-                    return
-                }
-                pupil.frame = .init(origin: newPupilOrigin,
-                                    size: .init(width: pupilD, height: pupilD))
-            }*/
-            
             animation?.update(percentilePosition: CGPoint(x: saniX, y: saniY))
-//            animation?.moveToVector(percentilePupilMoved)
         }
     }
     

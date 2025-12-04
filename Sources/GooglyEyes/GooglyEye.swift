@@ -40,30 +40,48 @@ public class GooglyEye: UIView {
     
     var percentilePupilMoved: CGPoint = .zero {
         didSet {
+            
             displayLink?.remove(from: .main, forMode: .default)
             displayLink = nil
-            animation?.stop()
-            animation = nil
+//            displayLink?.remove(from: .main, forMode: .default)
+//            displayLink = nil
+//            animation?.stop()
+//            animation = nil
             
-            let pupilD = diameter*pupilDiameterPercentageWidth
+            var saniX = percentilePupilMoved.x
+            
+            if percentilePupilMoved.x > 1 {
+                saniX = 1
+            } else if percentilePupilMoved.x < -1 {
+                saniX = -1
+            }
+
+            var saniY = percentilePupilMoved.y
+            if percentilePupilMoved.y > 1 {
+                saniY = 1
+            } else if percentilePupilMoved.y < -1 {
+                saniY = -1
+            }
+            
+            /*
+            
+            let pupilD = diameter*pupilDiameterPercentageWidth*0.97
             let pupilCenterXOffsetted = (diameter - pupilD)/2
 
-            let minY = percentilePupilMoved.y < -1 ? -1 : percentilePupilMoved.y
-            let minX = percentilePupilMoved.x < -1 ? -1 : percentilePupilMoved.x
-            
-            let sanitizedX = percentilePupilMoved.x > 1 ? 1 : minX
-            let sanitizedY = percentilePupilMoved.y > 1 ? 1 : minY
-
-            let newPupilOrigin: CGPoint = .init(x: sanitizedX*pupilCenterXOffsetted + pupilCenterXOffsetted,
-                                                y: sanitizedY*pupilCenterXOffsetted + pupilCenterXOffsetted)
+            print("::: saniX: \(saniX), saniY: \(saniY)")
+            let newPupilOrigin: CGPoint = .init(x: pupilD/2*saniX,//+ pupilCenterXOffsetted,
+                                                y: pupilD/2*saniY)// + pupilD/2)
             
             UIView.animate(withDuration: 0.15) { [weak self] in
                 guard let self else {
                     return
                 }
                 pupil.frame = .init(origin: newPupilOrigin,
-                                    size: .init(width: diameter*pupilDiameterPercentageWidth, height: diameter*pupilDiameterPercentageWidth))
-            }
+                                    size: .init(width: pupilD, height: pupilD))
+            }*/
+            
+            animation?.update(percentilePosition: CGPoint(x: saniX, y: saniY))
+//            animation?.moveToVector(percentilePupilMoved)
         }
     }
     
@@ -91,8 +109,7 @@ public class GooglyEye: UIView {
         
         self.animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
                                                     googlyEye: self,
-                                                    center: baseCutout.startCenter,
-                                                    travelRadius: diameter)
+                                                    center: baseCutout.startCenter)
     }
 
     private func updateDimensions() {
@@ -141,8 +158,7 @@ public class GooglyEye: UIView {
         if percentilePupilMoved != .zero {
             animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
                                                    googlyEye: self,
-                                                   center: baseCutout.startCenter,
-                                                   travelRadius: diameter)
+                                                   center: baseCutout.startCenter)
             updateDimensions()
         }
         

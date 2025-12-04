@@ -25,15 +25,9 @@ class GooglyEyesDynamicAnimation: NSObject {
     
     private weak var googlyEye: GooglyEye?
     
-    func stop() {
-        animator.removeAllBehaviors()
-        motionManager.stopDeviceMotionUpdates()
-    }
-    
     init(motionManager: CMMotionManager,
          googlyEye: GooglyEye,
-         center: CGPoint,
-         travelRadius: CGFloat) {
+         center: CGPoint) {
         self.motionManager = motionManager
         self.googlyEye = googlyEye
         animator = UIDynamicAnimator(referenceView: googlyEye)
@@ -117,6 +111,43 @@ class GooglyEyesDynamicAnimation: NSObject {
             animator.removeAllBehaviors()
             behaviorsLocked = true
         }
+    }
+    
+    func update(percentilePosition: CGPoint) {
+        guard let gravityBehavior = behaviors?["gravity"] as? UIFieldBehavior else {
+                assertionFailure()
+            return
+        }
+        
+        let direction: CGVector
+        direction = CGVector(dx: percentilePosition.x, dy: percentilePosition.y)
+        gravityBehavior.direction = direction
+        behaviors?["gravity"] = gravityBehavior
+
+        behaviorsLocked = false
+//        } else {
+//            friction.strength = 1.5
+//            
+//            direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
+//                   gravityBehavior.direction = direction
+//        }
+//        
+//        behaviors?["gravity"] = gravityBehavior
+//        behaviors?["friction"] = friction
+//        
+//        if (abs(gravity.z) < maxGravity ||
+//            (abs(acceleration.x) > maxAcceleration ||
+//             abs(acceleration.y) > maxAcceleration)) {
+//            if behaviorsLocked {
+//                if animator.behaviors.count < behaviors?.count ?? 0 {
+//                    resetBehaviors()
+//                }
+//            }
+//            behaviorsLocked = false
+//        } else {
+//            animator.removeAllBehaviors()
+//            behaviorsLocked = true
+//        }
     }
     
     private func resetBehaviors() {

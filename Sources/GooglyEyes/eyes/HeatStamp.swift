@@ -14,8 +14,16 @@ class HeatStamp: CALayer {
     var endCenter: CGPoint = .zero
     var startCenter: CGPoint = .zero
     
-    let edgeShadowGradient = CGGradient(colorsSpace: nil, colors: [UIColor(red: 0.2, green: 0.1, blue: 0.2, alpha: 0.01).cgColor, UIColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.6).cgColor, UIColor.clear.cgColor] as CFArray, locations: [0.78, 0.95, 0.999] as [CGFloat])
-    let innerShadowGradient = CGGradient(colorsSpace: nil, colors: [GooglyEye.paperGray(alpha: 0.2).cgColor, UIColor.clear.cgColor] as CFArray, locations: nil)
+    let edgeShadowGradient = CGGradient(colorsSpace: nil,
+                                        colors: [UIColor(red: 0.2, green: 0.1, blue: 0.2, alpha: 0.01).cgColor, 
+                                                 UIColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.6).cgColor,
+                                                 UIColor.clear.cgColor] as CFArray,
+                                        locations: [0.78, 0.95, 0.999] as [CGFloat])
+    
+    let innerShadowGradient = CGGradient(colorsSpace: nil,
+                                         colors: [GooglyEye.paperGray(alpha: 0.2).cgColor,
+                                                  UIColor.clear.cgColor] as CFArray,
+                                         locations: nil)
     
     func update() {
         endCenter = CGPoint(x: startCenter.x, y: startCenter.y)

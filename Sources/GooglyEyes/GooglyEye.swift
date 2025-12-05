@@ -43,7 +43,7 @@ public class GooglyEye: UIView {
             
             displayLink?.remove(from: .main, forMode: .default)
             displayLink = nil
-            
+
             var saniX = percentilePupilMoved.x
             
             if percentilePupilMoved.x > 1 {

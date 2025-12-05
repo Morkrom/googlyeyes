@@ -21,9 +21,17 @@ class GooglyEyesDynamicAnimation: NSObject {
     private let maxGravity = 0.95
     private let maxAcceleration = 0.0
     
+    private var travelRadius: CGFloat = 0.0
+    private var center: CGPoint = .zero
+
     private let motionManager: CMMotionManager
     
     private weak var googlyEye: GooglyEye?
+    
+    func stop() {
+        motionManager.stopDeviceMotionUpdates()
+        animator.removeAllBehaviors()
+    }
     
     init(motionManager: CMMotionManager,
          googlyEye: GooglyEye,
@@ -43,9 +51,11 @@ class GooglyEyesDynamicAnimation: NSObject {
     
     private func setup(center: CGPoint,
                        travelRadius: CGFloat) {
-        guard let  googlyEye else {
+        guard let googlyEye else {
             return
         }
+        self.center = center
+        self.travelRadius = travelRadius
         let boundaryBehavior = UICollisionBehavior(items: [googlyEye.pupil])
         let gravityBehavior = UIFieldBehavior.linearGravityField(direction: CGVector(dx: 0, dy: 0))
         
@@ -53,9 +63,12 @@ class GooglyEyesDynamicAnimation: NSObject {
         frictionBehavior.strength = 2
         gravityBehavior.strength = 10
 
-        let ovalFrame = CGRect(origin: CGPoint(x: center.x - travelRadius, y: center.y - travelRadius),
-                               size: CGSize(width: travelRadius*2, height: travelRadius*2))
-        boundaryBehavior.addBoundary(withIdentifier: "" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
+        let ovalFrame = CGRect(origin: CGPoint(x: center.x - travelRadius,
+                                               y: center.y - travelRadius),
+                               size: CGSize(width: travelRadius*2,
+                                            height: travelRadius*2))
+        
+        boundaryBehavior.addBoundary(withIdentifier: "BBound" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
         boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
         gravityBehavior.region = UIRegion(radius: travelRadius)
         gravityBehavior.position = center
@@ -63,7 +76,7 @@ class GooglyEyesDynamicAnimation: NSObject {
         frictionBehavior.addItem(googlyEye.pupil)
         
         boundaryBehavior.collisionDelegate = self
-        
+                
         animator.addBehavior(frictionBehavior)
         animator.addBehavior(gravityBehavior)
         animator.addBehavior(boundaryBehavior)
@@ -86,12 +99,11 @@ class GooglyEyesDynamicAnimation: NSObject {
             let z = acceleration.z
             direction = CGVector(dx: gravity.x * gvM + acceleration.x*accM*(z*z),
                                  dy: -gravity.y * gvM + acceleration.y*accM*(z*z))
-            
             gravityBehavior.direction = direction
         } else {
             friction.strength = 1.5
-            
-            direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
+            direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, 
+                                 dy: -gravity.y*gvM+acceleration.y*accM)
                    gravityBehavior.direction = direction
         }
         
@@ -112,42 +124,41 @@ class GooglyEyesDynamicAnimation: NSObject {
             behaviorsLocked = true
         }
     }
-    
     func update(percentilePosition: CGPoint) {
-        guard let gravityBehavior = behaviors?["gravity"] as? UIFieldBehavior else {
+        guard let gravityBehavior = behaviors?["gravity"] as? UIFieldBehavior,
+        let boundary = behaviors?["boundary"] as? UICollisionBehavior else {
                 assertionFailure()
             return
         }
         
-        let direction: CGVector
-        direction = CGVector(dx: percentilePosition.x, dy: percentilePosition.y)
-        gravityBehavior.direction = direction
-        behaviors?["gravity"] = gravityBehavior
+        gravityBehavior.direction = .zero
+        
+        let frictionToGravityRatio: CGFloat = 1/3
+        let gravityStrength: CGFloat = 1
+        
+        if let friction = behaviors?["friction"] as? UIFieldBehavior {
+            friction.strength = gravityStrength*frictionToGravityRatio
+        }
+                
+        if let gravity = behaviors?["WellGrav"] as? UIFieldBehavior {
 
+            gravity.position = .init(x: center.x + (travelRadius/2*percentilePosition.x),
+                                     y: center.y + (travelRadius/2*percentilePosition.y))
+            behaviors?["WellGrav"] = gravity
+        } else {
+            let gravity = UIFieldBehavior.radialGravityField(position: center)
+            gravity.position = .init(x: center.x + (travelRadius/2*percentilePosition.x),
+                                     y: center.y + (travelRadius/2*percentilePosition.y))
+            gravity.strength = gravityStrength
+            if let gEye = googlyEye {
+                gravity.addItem(gEye.pupil)
+            }
+            
+            animator.addBehavior(gravity)
+            behaviors?["WellGrav"] = gravity
+        }
+        
         behaviorsLocked = false
-//        } else {
-//            friction.strength = 1.5
-//            
-//            direction = CGVector(dx: gravity.x*gvM+acceleration.x*accM, dy: -gravity.y*gvM+acceleration.y*accM)
-//                   gravityBehavior.direction = direction
-//        }
-//        
-//        behaviors?["gravity"] = gravityBehavior
-//        behaviors?["friction"] = friction
-//        
-//        if (abs(gravity.z) < maxGravity ||
-//            (abs(acceleration.x) > maxAcceleration ||
-//             abs(acceleration.y) > maxAcceleration)) {
-//            if behaviorsLocked {
-//                if animator.behaviors.count < behaviors?.count ?? 0 {
-//                    resetBehaviors()
-//                }
-//            }
-//            behaviorsLocked = false
-//        } else {
-//            animator.removeAllBehaviors()
-//            behaviorsLocked = true
-//        }
     }
     
     private func resetBehaviors() {

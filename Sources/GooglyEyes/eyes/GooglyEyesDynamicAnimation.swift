@@ -133,7 +133,7 @@ class GooglyEyesDynamicAnimation: NSObject {
         
         gravityBehavior.direction = .zero
         
-        let frictionToGravityRatio: CGFloat = 1/3
+        let frictionToGravityRatio: CGFloat = 1/2.5
         let gravityStrength: CGFloat = 1
         
         if let friction = behaviors?["friction"] as? UIFieldBehavior {
@@ -150,6 +150,7 @@ class GooglyEyesDynamicAnimation: NSObject {
             gravity.position = .init(x: center.x + (travelRadius/2*percentilePosition.x),
                                      y: center.y + (travelRadius/2*percentilePosition.y))
             gravity.strength = gravityStrength
+            gravity.falloff = 0
             if let gEye = googlyEye {
                 gravity.addItem(gEye.pupil)
             }

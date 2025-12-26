@@ -14,12 +14,6 @@ public class GooglyEye: UIView {
     
     private let motionManager = CMMotionManager()
     
-    var pupilDiameterPercentageWidth: CGFloat = 0.62 {
-        didSet {
-            updateDimensions()
-        }
-    }
-    
     let pupil = Pupil()
     
     class func grayColor() -> UIColor {  GooglyEye.paperGray(alpha: 1.0) }
@@ -37,6 +31,15 @@ public class GooglyEye: UIView {
     private var orientation = UIApplication.shared.statusBarOrientation
     private var baseCutout = Sclera()
     private let innerStamp = HeatStamp()
+    
+    
+    var pupilDiameterPercentageWidth: CGFloat = 0.62 {
+        didSet {
+            updateDimensions()
+            animation?.updateBehaviors(center: baseCutout.startCenter,
+                                       travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
+        }
+    }
     
     var percentilePupilMoved: CGPoint = .zero {
         didSet {
@@ -68,6 +71,8 @@ public class GooglyEye: UIView {
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
         doCommonConfig()
         updateDimensions()
+        animation?.updateBehaviors(center: baseCutout.startCenter,
+                                   travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
     }
     
     public init() {
@@ -76,6 +81,8 @@ public class GooglyEye: UIView {
         displayLink = CADisplayLink(target: self, selector: #selector(GooglyEye.link))
         doCommonConfig()
         updateDimensions()
+        animation?.updateBehaviors(center: baseCutout.startCenter,
+                                   travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
     }
 
     private func doCommonConfig() {
@@ -86,10 +93,9 @@ public class GooglyEye: UIView {
         layer.addSublayer(innerStamp)
         
         self.animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
-                                                    googlyEye: self,
-                                                    center: baseCutout.startCenter)
+                                                    googlyEye: self)
     }
-
+    
     private func updateDimensions() {
         guard animation != nil else {
             return
@@ -108,8 +114,6 @@ public class GooglyEye: UIView {
 
         baseCutout.setNeedsDisplay()
         innerStamp.setNeedsDisplay()
-        animation?.updateBehaviors(center: baseCutout.startCenter,
-                                   travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
     }
     
     private func adjustPupilForNewWidth() {
@@ -134,12 +138,10 @@ public class GooglyEye: UIView {
         super.layoutIfNeeded()
         
         if percentilePupilMoved != .zero {
-            animation = GooglyEyesDynamicAnimation(motionManager: motionManager,
-                                                   googlyEye: self,
-                                                   center: baseCutout.startCenter)
             updateDimensions()
+            animation?.updateBehaviors(center: baseCutout.startCenter,
+                                       travelRadius: GooglyEye.cutoutRadius(dimension: diameter))
         }
-        
     }
     
     public override func layoutSubviews() {

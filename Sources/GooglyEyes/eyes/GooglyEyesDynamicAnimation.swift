@@ -34,12 +34,32 @@ class GooglyEyesDynamicAnimation: NSObject {
     }
     
     init(motionManager: CMMotionManager,
-         googlyEye: GooglyEye,
-         center: CGPoint) {
+         googlyEye: GooglyEye) {
         self.motionManager = motionManager
         self.googlyEye = googlyEye
         animator = UIDynamicAnimator(referenceView: googlyEye)
         motionManager.startDeviceMotionUpdates()
+    }
+    
+    func updateBehaviorsSafe(center: CGPoint,
+                         travelRadius: CGFloat) {
+        self.center = center
+        self.travelRadius = travelRadius
+        if let gravity = behaviors?["gravity"] as? UIFieldBehavior,
+           let boundary = behaviors?["boundary"] as? UICollisionBehavior {
+         
+            let ovalFrame = CGRect(origin: CGPoint(x: center.x - travelRadius,
+                                                   y: center.y - travelRadius),
+                                   size: CGSize(width: travelRadius*2,
+                                                height: travelRadius*2))
+            boundary.removeAllBoundaries()
+            boundary.addBoundary(withIdentifier: "BBound" as NSCopying, for: UIBezierPath(ovalIn: ovalFrame))
+            gravity.region = UIRegion(radius: travelRadius)
+            gravity.position = center
+            
+            behaviors?["gravity"] = gravity
+            behaviors?["boundary"] = boundary
+        }
     }
     
     func updateBehaviors(center: CGPoint,
@@ -72,6 +92,7 @@ class GooglyEyesDynamicAnimation: NSObject {
         boundaryBehavior.translatesReferenceBoundsIntoBoundary = true
         gravityBehavior.region = UIRegion(radius: travelRadius)
         gravityBehavior.position = center
+        
         gravityBehavior.addItem(googlyEye.pupil)
         frictionBehavior.addItem(googlyEye.pupil)
         
